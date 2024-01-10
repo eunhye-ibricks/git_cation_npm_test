@@ -1,12 +1,4 @@
-import {
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsPositive,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class SimpleSearchDTO {
@@ -15,17 +7,14 @@ export class SimpleSearchDTO {
   @IsString()
   readonly keyword: string;
 
-  @IsOptional()
   @Transform((params) => parseInt(params.value))
   @IsInt()
-  @IsPositive()
+  @Max(100)
   @Min(0)
-  @Max(10000)
-  readonly size: number;
+  readonly size?: number = 10;
 
-  @IsOptional()
   @Transform((params) => parseInt(params.value))
   @IsInt()
   @Min(0)
-  readonly from: number;
+  readonly from?: number = 0;
 }

@@ -13,8 +13,11 @@ import {
 import { SearchService } from './search.service';
 import { SimpleSearchDTO } from './dto/simple-search.dto';
 import { ElasticsearchExceptionFilter } from '../utils/filter/elasticsearch-exception.filter';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseCommonDTO } from './dto/response.common.dto';
 
 @Controller('search')
+@ApiTags('search')
 @UseFilters(ElasticsearchExceptionFilter)
 export class SearchController {
   constructor(
@@ -30,8 +33,13 @@ export class SearchController {
     return 'hello';
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+    type: ResponseCommonDTO,
+  })
   @Get('/simple')
-  async simpleSearch(@Body() dto: SimpleSearchDTO) {
+  async simpleSearch(@Query() dto: SimpleSearchDTO) {
     const { keyword, size, from } = dto;
     return await this.searchService.simpleSearch(keyword, size, from);
   }

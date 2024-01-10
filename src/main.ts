@@ -4,6 +4,8 @@ import { logger } from './utils/logger/winston';
 import { ConfigService } from '@nestjs/config';
 // import { AllExceptionsFilter } from './filter/all-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule } from '@nestjs/swagger';
+import { config as swaggerConfig } from './utils/swagger/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -20,6 +22,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document);
   await app.listen(configService.get('APP_PORT'));
 }
 bootstrap();
