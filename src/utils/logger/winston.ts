@@ -2,16 +2,10 @@ import {
   WinstonModule,
   utilities as nestWinstonModuleUtilities,
 } from 'nest-winston';
-import * as winston from 'winston';
-import * as WinstonDaily from 'winston-daily-rotate-file';
+import winston from 'winston';
+import WinstonDaily from 'winston-daily-rotate-file';
 import { loggerConfig } from 'config/loggerConfig';
 // import DailyRotateFile from 'winston-daily-rotate-file';
-
-const level = () => {
-  const env = process.env.NODE_ENV || 'development';
-  const isDevelopment = env === 'development';
-  return isDevelopment ? 'debug' : 'debug'; // 기본은 항상 debug
-};
 
 const format = winston.format.combine(
   winston.format.timestamp(),
