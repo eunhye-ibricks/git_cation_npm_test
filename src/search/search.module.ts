@@ -1,21 +1,23 @@
 import { Logger, Module } from '@nestjs/common';
 import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { SearchModel } from './search.model';
+import { GatewayModule } from 'src/gateway/gateway.module';
 @Module({
   imports: [
     ElasticsearchModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        node: configService.get('elasticsearch.node'),
-        maxRetries: configService.get('elasticsearch.maxRetries'),
-        pingTimeout: configService.get('elasticsearch.pingTimeout'),
-        sniffOnStart: configService.get('elasticsearch.sniffOnStart'),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const config = configService.get('elasticsearch');
+        if (!config) {
+          throw new Error('Elasticsearch configuration is not defined');
+        }
+        return config;
+      },
       inject: [ConfigService],
     }),
+    GatewayModule,
   ],
   controllers: [SearchController],
   providers: [SearchService, Logger, SearchModel],

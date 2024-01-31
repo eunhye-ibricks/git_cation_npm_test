@@ -20,11 +20,11 @@ import { RecommendDTO } from '../dto/gateway.recommend.dto';
 import { RelatedDTO } from '../dto/gateway.related.dto';
 import { ThemeDTO } from '../dto/gateway.theme.dto';
 import { SpellerModule } from '../speller/speller.module';
-import elasticsearchConfig from '../../../config/elasticsearchConfig';
 import { validationSchema } from '../../../config/validationSchema';
 import { AutocompleteDTO } from '../dto/gateway.autocomplete.dto';
 import { SpellerDTO } from '../dto/gateway.speller.dto';
 import { SpellerService } from '../speller/speller.service';
+import configuration from '../../../config/configuration';
 
 describe('GatewayController', () => {
   let controller: GatewayController;
@@ -33,7 +33,7 @@ describe('GatewayController', () => {
       imports: [
         ConfigModule.forRoot({
           envFilePath: [`./config/env/.test.env`],
-          load: [elasticsearchConfig],
+          load: [configuration],
           isGlobal: true,
           validationSchema,
         }),
