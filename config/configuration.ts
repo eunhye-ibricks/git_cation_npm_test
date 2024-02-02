@@ -15,7 +15,7 @@ export default () => ({
       maxSize: '100m',
     },
     debug: {
-      maxFiles: 1,
+      maxFiles: 7,
       maxSize: '500m',
     },
   },
