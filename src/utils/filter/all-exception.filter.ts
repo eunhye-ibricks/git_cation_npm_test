@@ -1,3 +1,4 @@
+import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import {
   ExceptionFilter,
   Catch,
@@ -18,17 +19,31 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const ctx = host.switchToHttp();
 
-    const httpStatus =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-
-    const responseBody = {
-      statusCode: httpStatus,
-      timestamp: new Date().toISOString(),
+    const responseBody: ErrorResponse = {
+      statusCode: 500,
+      message: '',
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
+      timestamp: new Date().toISOString(),
     };
 
-    httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
+    if (exception instanceof HttpException) {
+      responseBody.statusCode = exception.getStatus();
+      responseBody.message = JSON.stringify(exception.getResponse());
+    } else if (exception instanceof ElasticsearchClientError) {
+      responseBody.statusCode = HttpStatus.BAD_GATEWAY;
+      responseBody.message = `${exception.name}: ${exception.message}`;
+    } else {
+      responseBody.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+      responseBody.message = 'Internal Service Error';
+    }
+
+    httpAdapter.reply(ctx.getResponse(), responseBody, responseBody.statusCode);
   }
+}
+
+interface ErrorResponse {
+  statusCode: number;
+  message: string;
+  path: string;
+  timestamp: string;
 }

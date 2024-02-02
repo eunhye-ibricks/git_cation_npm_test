@@ -2,10 +2,10 @@ import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { logger } from './utils/logger/winston';
 import { ConfigService } from '@nestjs/config';
-// import { AllExceptionsFilter } from './filter/all-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 import { config as swaggerConfig } from './utils/swagger/swagger.config';
+import { AllExceptionsFilter } from './utils/filter/all-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -16,7 +16,7 @@ async function bootstrap() {
   logger.log(configService.get('ELASTICSEARCH_NODES'));
 
   const httpAdapter: HttpAdapterHost = app.get(HttpAdapterHost);
-  // app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
