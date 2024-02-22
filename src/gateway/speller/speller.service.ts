@@ -5,18 +5,15 @@ import {
   Logger,
   LoggerService,
   OnModuleInit,
-  UseFilters,
 } from '@nestjs/common';
 import { SpellerModel } from './speller.model';
 import { EditDistance } from './editdistance';
 import hangul from './hangul';
 import _moment from 'moment';
 import { Cron } from '@nestjs/schedule';
-import { ElasticsearchExceptionFilter } from 'src/utils/filter/elasticsearch-exception.filter';
 import { ApiResponse } from '@elastic/elasticsearch';
 
 @Injectable()
-// @UseFilters(ElasticsearchExceptionFilter)
 export class SpellerService implements OnModuleInit {
   constructor(
     @Inject(Logger) private readonly logger: LoggerService,

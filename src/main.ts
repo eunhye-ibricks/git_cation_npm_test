@@ -16,7 +16,7 @@ async function bootstrap() {
   logger.log(configService.get('ELASTICSEARCH_NODES'));
 
   const httpAdapter: HttpAdapterHost = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter, logger));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

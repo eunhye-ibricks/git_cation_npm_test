@@ -7,13 +7,11 @@ import {
   LoggerService,
   Post,
   Query,
-  UseFilters,
 } from '@nestjs/common';
 import { GatewayService } from './gateway.service';
 import { PopqueryDTO } from './dto/gateway.popquery.dto';
 import * as Responses from './dto/gateway.responses.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ElasticsearchExceptionFilter } from '../utils/filter/elasticsearch-exception.filter';
 import { HotqueryDTO } from './dto/gateway.hotquery.dto';
 import { RecommendDTO } from './dto/gateway.recommend.dto';
 import { RelatedDTO } from './dto/gateway.related.dto';
@@ -24,7 +22,6 @@ import { QuerylogDTO } from './dto/gateway.querylog.dto';
 
 @Controller('gateway')
 @ApiTags('gateway')
-@UseFilters(ElasticsearchExceptionFilter)
 export class GatewayController {
   constructor(
     @Inject(Logger) private readonly logger: LoggerService,

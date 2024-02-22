@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import * as gatewayConfig from './config/gateway.config';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import _moment from 'moment';
 import { SearchResult } from './gateway.interfaces';
@@ -179,7 +178,6 @@ export class GatewayModel {
       body,
     });
 
-    this.logger.log(esResult);
     return { esResult, index };
   }
 
