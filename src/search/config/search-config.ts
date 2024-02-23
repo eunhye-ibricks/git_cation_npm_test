@@ -1,39 +1,37 @@
-interface SearchConfig {
-  index: Array<string>;
-  field: {
-    search: Array<string>;
-    highlight: Array<string>;
-    result: Array<string>;
-  };
-  body: {
-    from: number;
-    size: number;
-    query: any;
-    _source: any;
-    highlight: any;
-  };
-}
+import { SearchConfig } from '../search.interfaces';
 
-export const simpleConfig = (): SearchConfig => ({
-  index: ['news', 'stock'],
-  field: {
-    search: ['title', 'content'],
-    highlight: ['reporter', 'title', 'content'],
-    result: ['title'],
-  },
-  body: {
-    from: 0,
-    size: 0,
+export const simpleConfig = (): SearchConfig => {
+  const index = ['news', 'stock'];
+  const fields = {
+    search: ['title', 'content', 'reporter'],
+    result: ['title', 'reporter'],
+    highlight: {
+      reporter: {},
+      title: {},
+      content: {},
+    },
+  };
+
+  const body = {
     query: {
       bool: {
         must: [],
         filter: [],
-        should: [],
       },
     },
-    _source: [],
-    highlight: {
-      fields: {},
+    _source: {
+      includes: fields.result,
     },
-  },
-});
+    highlight: {
+      fields: fields.highlight,
+    },
+    from: 0,
+    size: 10,
+  };
+
+  return {
+    index,
+    fields,
+    body,
+  };
+};

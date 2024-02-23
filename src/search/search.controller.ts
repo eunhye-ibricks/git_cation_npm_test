@@ -22,7 +22,6 @@ export class SearchController {
 
   @Get()
   getHello(): string {
-    this.logger.log('hahahahaha');
     throw new HttpException('getHello failed', 444);
     return 'hello';
   }
