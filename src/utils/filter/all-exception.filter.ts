@@ -22,6 +22,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const { httpAdapter } = this.httpAdapterHost;
 
     const ctx = host.switchToHttp();
+    const request = ctx.getRequest<Request>();
+    // filter sensitive data
+    const safeReqBody = { ...request.body };
 
     const responseBody: ErrorResponse = {
       statusCode: 500,
@@ -40,7 +43,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       responseBody.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
       responseBody.message = 'Internal Service Error';
     }
+
+    const errorInfo = {
+      method: request.method,
+      url: request.url,
+      body: safeReqBody,
+      error: exception,
+    };
+
     this.logger.error(exception);
+    this.logger.error('Error Info:', errorInfo);
+
     httpAdapter.reply(ctx.getResponse(), responseBody, responseBody.statusCode);
   }
 }

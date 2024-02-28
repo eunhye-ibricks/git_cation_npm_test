@@ -29,7 +29,7 @@ export class SearchModel {
     body.size = size;
     body.from = from;
 
-    this.logger.log(JSON.stringify({ index, body }));
+    this.logger.log('simpleSearch()', JSON.stringify({ index, body }));
     const esResult = await this.esService.search({
       index,
       body,

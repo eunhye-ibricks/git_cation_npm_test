@@ -35,8 +35,7 @@ export class SearchService {
       body,
     };
 
-    // this.logger.log({ index, query, total, took }, 'result');
-    this.logger.log(JSON.stringify({ index, took, total }));
+    this.logger.log('response', JSON.stringify({ index, took, total }));
     this.gatewayService.querylog(index, query, total, took).catch((err) => {
       this.logger.error('querylog faild');
       this.logger.error(err);

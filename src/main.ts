@@ -12,8 +12,13 @@ async function bootstrap() {
     logger,
   });
   const configService = app.get(ConfigService);
-  logger.log(configService.get('APP_PORT'));
-  logger.log(configService.get('ELASTICSEARCH_NODES'));
+  logger.log(
+    '*************************** Config ***************************\n',
+  );
+  logger.log(`ENV: ${configService.get('NODE_ENV')}`);
+  logger.log(`Port: ${configService.get('APP_PORT')}`);
+  logger.log(`ES Nodes: ${configService.get('ELASTICSEARCH_NODES')}\n`);
+  logger.log('**************************** End *****************************');
 
   const httpAdapter: HttpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter, logger));

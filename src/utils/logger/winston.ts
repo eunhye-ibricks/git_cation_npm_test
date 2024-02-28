@@ -33,17 +33,25 @@ const format = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
   winston.format.errors({ stack: true }),
   winston.format.printf((info) => {
-    const { level, message, timestamp, stack } = info;
+    const { level, message, timestamp, stack, error, context } = info;
     let log = `${timestamp} [${level}][${
       process.env.INSTANCE_ID ? process.env.INSTANCE_ID : 0
     }] ${''}: `;
 
-    if (typeof message === 'string') {
+    if (level === 'error') {
+      if (error && stack) {
+        log += `${stack}`;
+      } else {
+        log += message;
+        if (stack?.[0]) {
+          log += ` ${JSON.stringify(stack[0])}`;
+        }
+      }
+    } else {
       log += message;
-    }
-
-    if (stack) {
-      log += `${stack}`;
+      if (context) {
+        log += ` ${context}`;
+      }
     }
 
     return log;
