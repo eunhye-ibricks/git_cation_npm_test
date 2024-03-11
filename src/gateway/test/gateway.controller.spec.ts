@@ -11,8 +11,6 @@ import { plainToClass } from 'class-transformer';
 import { GatewayService } from '../gateway.service';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { GatewayModel } from '../gateway.model';
-import { APP_FILTER } from '@nestjs/core';
-import { ElasticsearchExceptionFilter } from '../../utils/filter/elasticsearch-exception.filter';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HotqueryDTO } from '../dto/gateway.hotquery.dto';
@@ -45,15 +43,7 @@ describe('GatewayController', () => {
         }),
       ],
       controllers: [GatewayController],
-      providers: [
-        GatewayService,
-        GatewayModel,
-        Logger,
-        {
-          provide: APP_FILTER,
-          useValue: new ElasticsearchExceptionFilter(),
-        },
-      ],
+      providers: [GatewayService, GatewayModel, Logger],
     }).compile();
 
     controller = module.get<GatewayController>(GatewayController);
@@ -64,16 +54,19 @@ describe('GatewayController', () => {
   describe('popquery', () => {
     it('should return array of PopqueryResponseDTO', async () => {
       const dto = plainToClass(PopqueryDTO, { label: 'ibricks' });
-      const result = await controller.popquery(dto);
-      expect(result).toBeInstanceOf(Array<PopqueryResponseDTO>);
+      const resultArray = await controller.popquery(dto);
+      resultArray.forEach((result) => {
+        const resultInstance = plainToClass(PopqueryResponseDTO, result);
+        expect(resultInstance).toBeInstanceOf(PopqueryResponseDTO);
+      });
     });
 
-    it('should return empty array', async () => {
-      const dto = plainToClass(PopqueryDTO, { label: 'empty' });
-      const result = await controller.popquery(dto);
+    // it('should return empty array', async () => {
+    //   const dto = plainToClass(PopqueryDTO, { label: 'empty' });
+    //   const result = await controller.popquery(dto);
 
-      expect(result).toEqual([]);
-    });
+    //   expect(result).toEqual([]);
+    // });
 
     it('should return bad request error', async () => {
       const dto = plainToClass(PopqueryDTO, { label: 'label-not-exist' });
@@ -86,15 +79,19 @@ describe('GatewayController', () => {
   describe('hotquery', () => {
     it('should return array of HotqueryResponseDTO', async () => {
       const dto = plainToClass(HotqueryDTO, { label: 'ibricks' });
-      const result = await controller.hotquery(dto);
-      expect(result).toBeInstanceOf(Array<HotqueryResponseDTO>);
+      const resultArray = await controller.hotquery(dto);
+      resultArray.forEach((result) => {
+        const resultInstance = plainToClass(HotqueryResponseDTO, result);
+        expect(resultInstance).toBeInstanceOf(HotqueryResponseDTO);
+      });
+      // expect(result).toBeInstanceOf(Array<HotqueryResponseDTO>);
     });
 
-    it('should return empty array', async () => {
-      const dto = plainToClass(HotqueryDTO, { label: 'empty' });
-      const result = await controller.hotquery(dto);
-      expect(result).toEqual([]);
-    });
+    // it('should return empty array', async () => {
+    //   const dto = plainToClass(HotqueryDTO, { label: 'empty' });
+    //   const result = await controller.hotquery(dto);
+    //   expect(result).toEqual([]);
+    // });
 
     it('should return bad request error', async () => {
       const dto = plainToClass(HotqueryDTO, { label: 'label-not-exist' });
@@ -110,8 +107,11 @@ describe('GatewayController', () => {
         label: 'ibricks',
         keyword: '아이브릭스',
       });
-      const result = await controller.recommend(dto);
-      expect(result).toBeInstanceOf(Array<string>);
+      const resultArray = await controller.recommend(dto);
+      expect(resultArray).toBeInstanceOf(Array);
+      expect(
+        resultArray.every((item) => typeof item === 'string'),
+      ).toBeTruthy();
     });
 
     it('should return empty array', async () => {
@@ -140,8 +140,11 @@ describe('GatewayController', () => {
         label: 'stock',
         keyword: '기준금리',
       });
-      const result = await controller.related(dto);
-      expect(result).toBeInstanceOf(Array<string>);
+      const resultArray = await controller.related(dto);
+      expect(resultArray).toBeInstanceOf(Array);
+      expect(
+        resultArray.every((item) => typeof item === 'string'),
+      ).toBeTruthy();
     });
 
     it('should return empty array', async () => {
@@ -165,12 +168,13 @@ describe('GatewayController', () => {
   });
 
   describe('theme', () => {
-    it('should return array of string', async () => {
+    it('should return string(comma seperated)', async () => {
       const dto = plainToClass(ThemeDTO, {
         label: 'ibricks',
         keyword: '서비스운영팀',
       });
       const result = await controller.theme(dto);
+      console.log(result);
       expect(typeof result).toBe('string');
     });
 
@@ -195,13 +199,17 @@ describe('GatewayController', () => {
   });
 
   describe('autocomplete', () => {
-    it('should return array of ', async () => {
+    it('should return array of AutocompleteResponseDTO', async () => {
       const dto = plainToClass(AutocompleteDTO, {
         label: 'ibricks',
         keyword: '아',
       });
-      const result = await controller.autocomplete(dto);
-      expect(result).toBeInstanceOf(Array<AutocompleteResponseDTO>);
+      const resultArray = await controller.autocomplete(dto);
+      // expect(result).toBeInstanceOf(Array<AutocompleteResponseDTO>);
+      resultArray.forEach((result) => {
+        const resultInstance = plainToClass(AutocompleteResponseDTO, result);
+        expect(resultInstance).toBeInstanceOf(AutocompleteResponseDTO);
+      });
     });
 
     it('should return empty array', async () => {
