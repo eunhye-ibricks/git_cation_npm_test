@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  HttpException,
   Inject,
   Logger,
   LoggerService,
@@ -20,19 +19,15 @@ export class SearchController {
     private readonly searchService: SearchService,
   ) {}
 
-  @Get()
-  getHello(): string {
-    throw new HttpException('getHello failed', 444);
-    return 'hello';
-  }
-
   @Get('/simple')
   @ApiResponse({
     status: 200,
     description: 'success',
     type: ResponseCommonDTO,
   })
-  async simpleSearch(@Query() dto: SimpleSearchDTO) {
+  async simpleSearch(
+    @Query() dto: SimpleSearchDTO,
+  ): Promise<ResponseCommonDTO> {
     const { keyword, size, from } = dto;
     return await this.searchService.simpleSearch(keyword, size, from);
   }

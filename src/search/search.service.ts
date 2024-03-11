@@ -1,6 +1,6 @@
 import { Injectable, Inject, LoggerService, Logger } from '@nestjs/common';
 import { SearchModel } from './search.model';
-import { GatewayService } from 'src/gateway/gateway.service';
+import { GatewayService } from '../gateway/gateway.service';
 import { ResponseCommonDTO } from './dto/response.common.dto';
 @Injectable()
 export class SearchService {
@@ -28,7 +28,7 @@ export class SearchService {
     const query = keyword;
     const took = esResult.body.took;
     const total = esResult.body.hits.total.value;
-    const response = {
+    const response: ResponseCommonDTO = {
       index,
       took,
       total,
