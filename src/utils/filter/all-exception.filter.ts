@@ -35,7 +35,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       responseBody.statusCode = exception.getStatus();
-      responseBody.message = JSON.stringify(exception.getResponse());
+      responseBody.message = exception.message;
     } else if (exception instanceof ElasticsearchClientError) {
       responseBody.statusCode = HttpStatus.BAD_GATEWAY;
       responseBody.message = `${exception.name}: ${exception.message}`;
