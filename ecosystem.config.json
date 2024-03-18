@@ -1,0 +1,21 @@
+{
+  "apps": [
+    {
+      "name": "api-template",
+      "script": "dist/src/main.js",
+      "instance_var": "INSTANCE_ID",
+      "ignore_watch": ["node_modules", "logs"],
+      "exec_mode": "cluster",
+      "instances": 2,
+      "env_development": {
+        "NODE_ENV": "development",
+        "watch": true
+      },
+      "env_production": {
+        "NODE_ENV": "production",
+        "watch": false
+      },
+      "exp_backoff_restart_delay": 100
+    }
+  ]
+}
