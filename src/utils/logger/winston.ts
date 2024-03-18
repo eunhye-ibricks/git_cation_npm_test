@@ -2,21 +2,11 @@ import { WinstonModule } from 'nest-winston';
 import winston from 'winston';
 import WinstonDaily from 'winston-daily-rotate-file';
 import config from 'config/configuration';
-
+import * as Transport from 'winston-transport';
 const loggerConfig = config().logger;
-// const format = winston.format.combine(
-//   winston.format.timestamp(),
-//   winston.format.ms(),
-//   nestWinstonModuleUtilities.format.nestLike('MyApp', {
-//     colors: false,
-//     prettyPrint: true,
-//   }),
-// );
 
 const level = () => {
-  const env = process.env.NODE_ENV || 'development';
-  const isDevelopment = env === 'development';
-  return isDevelopment ? 'debug' : 'debug';
+  return loggerConfig.debugLog ? 'debug' : 'info';
 };
 
 const colors = {
@@ -60,36 +50,38 @@ const format = winston.format.combine(
 
 const consoleOpts = {
   handleExceptions: true,
-  level: process.env.NODE_ENV === 'production' ? 'error' : 'debug',
+  // level: 'debug',
   format: winston.format.combine(
     winston.format.colorize({ all: true }),
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   ),
 };
 
-const transports = [
-  new winston.transports.Console(consoleOpts),
+const transports: Transport[] = [
   new WinstonDaily({
-    level: 'info',
     datePattern: 'YYYY-MM-DD',
-    dirname: `${loggerConfig.path}/logs/info`,
-    filename: '%DATE%.info.log',
+    dirname: `${loggerConfig.path}/logs`,
+    filename: '%DATE%.log',
     maxFiles: loggerConfig.log.maxFiles || 30,
     maxSize: loggerConfig.log.maxSize || '100m',
     zippedArchive: true,
-    // format: format,
   }),
-  new WinstonDaily({
-    level: 'debug',
-    datePattern: 'YYYY-MM-DD',
-    dirname: `${loggerConfig.path}/logs/debug`,
-    filename: '%DATE%.debug.log',
-    maxFiles: loggerConfig.debug.maxFiles || 7,
-    maxSize: loggerConfig.debug.maxSize || '500m',
-    zippedArchive: true,
-    // format: format,
-  }),
+  // new WinstonDaily({
+  //   level: 'debug',
+  //   datePattern: 'YYYY-MM-DD',
+  //   dirname: `${loggerConfig.path}/logs/debug`,
+  //   filename: '%DATE%.debug.log',
+  //   maxFiles: loggerConfig.debug.maxFiles || 7,
+  //   maxSize: loggerConfig.debug.maxSize || '500m',
+  //   zippedArchive: true,
+  //   // format: format,
+  // }),
 ];
+
+if (process.env.NODE_ENV !== 'production') {
+  transports.push(new winston.transports.Console(consoleOpts));
+}
+
 export const logger = WinstonModule.createLogger({
   level: level(),
   format,

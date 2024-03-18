@@ -9,6 +9,7 @@ export default () => ({
     sniffOnStart: true,
   },
   logger: {
+    debugLog: false,
     path: '.',
     log: {
       maxFiles: 30,
