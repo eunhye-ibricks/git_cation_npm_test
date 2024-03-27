@@ -3,8 +3,9 @@
     {
       "name": "api-template",
       "script": "dist/src/main.js",
+      "cwd": "../",
       "instance_var": "INSTANCE_ID",
-      "ignore_watch": ["node_modules", "logs"],
+      "ignore_watch": ["node_modules", "logs", ".pm2"],
       "exec_mode": "cluster",
       "instances": 2,
       "env_development": {
