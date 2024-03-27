@@ -26,7 +26,7 @@ import configuration from '../../../config/configuration';
 
 describe('GatewayController', () => {
   let controller: GatewayController;
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
@@ -174,7 +174,6 @@ describe('GatewayController', () => {
         keyword: '서비스운영팀',
       });
       const result = await controller.theme(dto);
-      console.log(result);
       expect(typeof result).toBe('string');
     });
 
@@ -239,8 +238,8 @@ describe('GatewayController', () => {
         query: '건깅',
       });
       const result = await controller.speller(dto);
-      console.log(result.correction);
       expect(result).toMatchObject(new SpellerResponse());
+      expect(result.correction).toBe('건강');
     });
 
     it('should return same keyword when keyword not exist', async () => {

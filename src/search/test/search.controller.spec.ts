@@ -15,7 +15,7 @@ import { ResponseCommonDTO } from '../dto/response.common.dto';
 describe('SearchController', () => {
   let controller: SearchController;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SearchController],
       imports: [
