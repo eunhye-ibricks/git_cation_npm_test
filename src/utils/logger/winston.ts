@@ -60,7 +60,7 @@ const consoleOpts = {
 const transports: Transport[] = [
   new WinstonDaily({
     datePattern: 'YYYY-MM-DD',
-    dirname: `${loggerConfig.path}/logs`,
+    dirname: `${loggerConfig.path}`,
     filename: '%DATE%.log',
     maxFiles: loggerConfig.log.maxFiles || 30,
     maxSize: loggerConfig.log.maxSize || '100m',

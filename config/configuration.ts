@@ -10,14 +10,10 @@ export default () => ({
   },
   logger: {
     debugLog: false,
-    path: '.',
+    path: process.env.LOG_PATH || './logs',
     log: {
       maxFiles: 30,
       maxSize: '100m',
-    },
-    debug: {
-      maxFiles: 7,
-      maxSize: '500m',
     },
   },
 });

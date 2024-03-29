@@ -26,4 +26,5 @@ export const validationSchema = Joi.object({
   ELASTICSEARCH_NODES: Joi.string()
     .custom(urlListSchema, 'Node URL Validation')
     .required(),
+  LOG_PATH: Joi.string(),
 });
