@@ -194,6 +194,7 @@ export class GatewayModel {
         break;
       case 'related':
         body.query.term = { 'related.label': { value: label } };
+        break;
       case 'autocomplete':
         body.query.term = { 'autocomplete.label': { value: label } };
         break;

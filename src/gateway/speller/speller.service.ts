@@ -12,6 +12,7 @@ import hangul from './hangul';
 import _moment from 'moment';
 import { Cron } from '@nestjs/schedule';
 import { ApiResponse } from '@elastic/elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
 @Injectable()
 export class SpellerService implements OnModuleInit {
@@ -39,27 +40,36 @@ export class SpellerService implements OnModuleInit {
   }
 
   async update() {
-    const { esResult } = await this.spellerModel.getSpellerLabel();
+    try {
+      const { esResult } = await this.spellerModel.getSpellerLabel();
 
-    if (esResult.body.hits.hits.length === 0) {
-      return;
-    }
-
-    esResult.body.hits.hits.forEach(async (hit: any) => {
-      const label: string = hit._source.speller.label;
-
-      if (!this.speller.hasOwnProperty(label)) {
-        this.speller[label] = {
-          ed: new EditDistance(),
-          typo: {},
-          timestamp: 0,
-          total: 0,
-        };
+      if (esResult.body.hits.hits.length === 0) {
+        return;
       }
-      // setTimeout(checkTimestamp, 1, resolve, reject, label);
-      await this.checkTimestamp(label);
-      // await this.load(label, )
-    });
+
+      esResult.body.hits.hits.forEach(async (hit: any) => {
+        const label: string = hit._source.speller.label;
+
+        if (!this.speller.hasOwnProperty(label)) {
+          this.speller[label] = {
+            ed: new EditDistance(),
+            typo: {},
+            timestamp: 0,
+            total: 0,
+          };
+        }
+        await this.checkTimestamp(label);
+      });
+    } catch (error) {
+      if (
+        error instanceof ResponseError &&
+        error.message === 'index_not_found_exception'
+      ) {
+        this.logger.debug('no speller index');
+        return;
+      }
+      throw error;
+    }
   }
 
   async correct(
