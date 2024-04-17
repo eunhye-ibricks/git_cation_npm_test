@@ -12,7 +12,11 @@ import hangul from './hangul';
 import _moment from 'moment';
 import { Cron } from '@nestjs/schedule';
 import { ApiResponse } from '@elastic/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import {
+  ConnectionError,
+  ElasticsearchClientError,
+  ResponseError,
+} from '@elastic/elasticsearch/lib/errors';
 
 @Injectable()
 export class SpellerService implements OnModuleInit {
@@ -61,14 +65,11 @@ export class SpellerService implements OnModuleInit {
         await this.checkTimestamp(label);
       });
     } catch (error) {
-      if (
-        error instanceof ResponseError &&
-        error.message === 'index_not_found_exception'
-      ) {
-        this.logger.debug('no speller index');
-        return;
+      if (error instanceof ElasticsearchClientError) {
+        return this.handleEsError(error);
       }
-      throw error;
+
+      this.logger.error(error);
     }
   }
 
@@ -228,5 +229,17 @@ export class SpellerService implements OnModuleInit {
 
     this.logger.log('speller dictionary update completed');
     this.logger.log(`total: ${this.speller[label].total}`);
+  }
+
+  private handleEsError(error: ElasticsearchClientError): void {
+    if (error instanceof ConnectionError) {
+      this.logger.debug('Speller - Elasticsearch Connection failed');
+    } else if (
+      error instanceof ResponseError &&
+      error.message === 'index_not_found_exception'
+    ) {
+      this.logger.debug('no speller index');
+      return;
+    }
   }
 }
