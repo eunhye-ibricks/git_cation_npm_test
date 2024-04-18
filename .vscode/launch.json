@@ -17,6 +17,7 @@
       "runtimeArgs": ["nodemon"],
       "restart": true,
       "skipFiles": ["<node_internals>/**"],
+      "preLaunchTask": "npm: build",
       "env": {
         "NODE_ENV": "development"
       }
