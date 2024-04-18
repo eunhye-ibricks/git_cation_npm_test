@@ -25,6 +25,7 @@ const format = winston.format.combine(
   winston.format.printf((info) => {
     const { level, message, timestamp, stack, error, context, ...extraInfo } =
       info;
+
     let log = `${timestamp} [${level}][${
       process.env.INSTANCE_ID ? process.env.INSTANCE_ID : 0
     }] ${''}: `;
@@ -39,8 +40,8 @@ const format = winston.format.combine(
 
         if (Object.getOwnPropertyNames(extraInfo).length > 0) {
           log += JSON.stringify(extraInfo, createReplacer());
-        } else if (stack) {
-          log += ` ${stack[0].stack}`;
+        } else if (stack && stack[0]) {
+          log += ` ${stack[0]}`;
         }
       }
     } else {
