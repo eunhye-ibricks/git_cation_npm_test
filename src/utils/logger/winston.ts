@@ -23,24 +23,38 @@ const format = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
   winston.format.errors({ stack: true }),
   winston.format.printf((info) => {
-    const { level, message, timestamp, stack, error, context } = info;
+    const { level, message, timestamp, stack, error, context, ...extraInfo } =
+      info;
     let log = `${timestamp} [${level}][${
       process.env.INSTANCE_ID ? process.env.INSTANCE_ID : 0
     }] ${''}: `;
 
     if (level === 'error') {
-      if (error && stack) {
-        log += `${stack}`;
+      if (error) {
+        log += `${error.stack}`;
       } else {
-        log += message;
-        if (stack?.[0]) {
-          log += ` ${JSON.stringify(stack[0])}`;
+        if (message) {
+          log += message;
+        }
+
+        if (Object.getOwnPropertyNames(extraInfo).length > 0) {
+          log += JSON.stringify(extraInfo, createReplacer());
+        } else if (stack) {
+          log += ` ${stack[0].stack}`;
         }
       }
     } else {
-      log += message;
+      if (message) {
+        log += message;
+      }
+      if (Object.getOwnPropertyNames(extraInfo).length > 0) {
+        log += JSON.stringify(extraInfo, createReplacer());
+      }
       if (context) {
-        log += ` ${context}`;
+        log +=
+          typeof context === 'object'
+            ? ` ${JSON.stringify(context, createReplacer())}`
+            : ` ${context}`;
       }
     }
 
@@ -80,6 +94,21 @@ const transports: Transport[] = [
 
 if (process.env.NODE_ENV !== 'production') {
   transports.push(new winston.transports.Console(consoleOpts));
+}
+
+// 객체 출력시 순환참조 처리하는 함수
+function createReplacer() {
+  const seen = new WeakSet();
+  return function (key, value) {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        // 순환 참조 발견
+        return;
+      }
+      seen.add(value);
+    }
+    return value;
+  };
 }
 
 export const logger = WinstonModule.createLogger({
