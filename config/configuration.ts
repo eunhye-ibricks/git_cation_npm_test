@@ -9,7 +9,8 @@ export default () => ({
     sniffOnStart: true,
   },
   logger: {
-    debugLog: false,
+    debug: false,
+    console: true,
     path: process.env.LOG_PATH || './logs',
     log: {
       maxFiles: 30,

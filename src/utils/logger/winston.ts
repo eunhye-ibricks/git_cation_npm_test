@@ -6,7 +6,7 @@ import * as Transport from 'winston-transport';
 const loggerConfig = config().logger;
 
 const level = () => {
-  return loggerConfig.debugLog ? 'debug' : 'info';
+  return loggerConfig.debug ? 'debug' : 'info';
 };
 
 const colors = {
@@ -41,7 +41,9 @@ const format = winston.format.combine(
         if (Object.getOwnPropertyNames(extraInfo).length > 0) {
           log += JSON.stringify(extraInfo, createReplacer());
         } else if (stack && stack[0]) {
-          log += ` ${stack[0]}`;
+          log += stack[0].stack
+            ? ` ${stack[0].stack}`
+            : ` ${JSON.stringify(stack[0], createReplacer())}`;
         }
       }
     } else {
@@ -93,14 +95,14 @@ const transports: Transport[] = [
   // }),
 ];
 
-if (process.env.NODE_ENV !== 'production') {
+if (loggerConfig.console) {
   transports.push(new winston.transports.Console(consoleOpts));
 }
 
 // 객체 출력시 순환참조 처리하는 함수
 function createReplacer() {
   const seen = new WeakSet();
-  return function (key, value) {
+  return function (_key: string, value: any) {
     if (typeof value === 'object' && value !== null) {
       if (seen.has(value)) {
         // 순환 참조 발견
