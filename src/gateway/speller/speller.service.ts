@@ -158,7 +158,7 @@ export class SpellerService implements OnModuleInit {
       this.speller[label].timestamp < timestamp.valueOf() ||
       this.speller[label].total != total
     ) {
-      this.logger.log('loading speller ...');
+      this.logger.log(`loading speller dictionary [${label}]...`);
       await this.load(label, {
         ed: new EditDistance(),
         typo: {},
@@ -227,8 +227,9 @@ export class SpellerService implements OnModuleInit {
     this.speller[label].timestamp = newinstance.timestamp;
     this.speller[label].total = newinstance.total;
 
-    this.logger.log('speller dictionary update completed');
-    this.logger.log(`total: ${this.speller[label].total}`);
+    this.logger.log(
+      `speller dictionary [${label}] update completed / total: ${this.speller[label].total}`,
+    );
   }
 
   private handleEsError(error: ElasticsearchClientError): void {
