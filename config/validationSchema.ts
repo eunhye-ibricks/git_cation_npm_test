@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 
-const urlListSchema = (value, helpers) => {
+const urlListSchema = (value: string, helpers: any) => {
   // 쉼표로 구분하여 URL 배열을 생성
   const urls = value.split(',');
 

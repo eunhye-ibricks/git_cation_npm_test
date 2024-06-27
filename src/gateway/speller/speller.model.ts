@@ -26,7 +26,7 @@ export class SpellerModel {
     return { esResult, index };
   }
 
-  async getSpellerTimestamp(label): Promise<SearchResult> {
+  async getSpellerTimestamp(label: string): Promise<SearchResult> {
     const index = '.openquery-speller';
     const body = {
       size: 1,
@@ -48,7 +48,7 @@ export class SpellerModel {
     return { esResult, index };
   }
 
-  async getSpellerData(label, scrollId): Promise<SearchResult> {
+  async getSpellerData(label: string, scrollId: string): Promise<SearchResult> {
     const index = '.openquery-speller';
     const scrollTime = '30s';
 

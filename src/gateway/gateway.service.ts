@@ -198,10 +198,11 @@ export class GatewayService {
   private highlightReplace(
     value: string | string[],
     fields: string[],
-    highlight: string,
+    highlight: any,
   ) {
-    if (value.constructor === Array) {
-      const ret = [];
+    // if (value.constructor === Array) {
+    if (Array.isArray(value)) {
+      const ret: any[] = [];
 
       value.forEach((v) => {
         const every = fields.every((f) => {

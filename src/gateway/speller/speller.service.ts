@@ -175,7 +175,7 @@ export class SpellerService implements OnModuleInit {
       this.insert(esResult, label, newinstance);
 
       let count = esResult.body.hits.hits.length;
-      const scrollId = esResult.body._scroll_id;
+      const scrollId: string = esResult.body._scroll_id;
 
       while (count > 0) {
         const scrollResult = (

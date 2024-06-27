@@ -19,7 +19,7 @@ export class GatewayModel {
   ) {}
 
   async popquery(label: string): Promise<SearchResult> {
-    const { index, body } = gatewayConfig.popquery;
+    const { index, body } = gatewayConfig.popquery();
 
     body.query.term.label = label;
 
@@ -30,7 +30,7 @@ export class GatewayModel {
   }
 
   async hotquery(label: string): Promise<SearchResult> {
-    const { index, body } = gatewayConfig.hotquery;
+    const { index, body } = gatewayConfig.hotquery();
 
     body.query.term.label = label;
 
@@ -41,7 +41,7 @@ export class GatewayModel {
   }
 
   async recommend(label: string, keyword: string): Promise<SearchResult> {
-    const { index, body } = gatewayConfig.recommend;
+    const { index, body } = gatewayConfig.recommend();
 
     body.query.bool.must.push(
       { match: { label: label } },
@@ -55,7 +55,7 @@ export class GatewayModel {
   }
 
   async related(label: string, keyword: string): Promise<SearchResult> {
-    const { index, body } = gatewayConfig.related;
+    const { index, body } = gatewayConfig.related();
 
     body.query.bool.must.push(
       { match: { label: label } },
@@ -69,7 +69,7 @@ export class GatewayModel {
   }
 
   async theme(label: string, keyword: string): Promise<SearchResult> {
-    const { index, body } = gatewayConfig.theme;
+    const { index, body } = gatewayConfig.theme();
 
     body.query.bool.must.push(
       { match: { 'keywords.keyword': keyword } },
@@ -90,8 +90,8 @@ export class GatewayModel {
     size: number,
     sort: string,
   ): Promise<SearchResult> {
-    const index = gatewayConfig.autocomplete.index + label;
-    const { body } = gatewayConfig.autocomplete;
+    const index = gatewayConfig.autocomplete().index + label;
+    const { body } = gatewayConfig.autocomplete();
 
     const keywordFields: string[] = [];
     keywordFields.push('keyword.autocomplete');
@@ -182,7 +182,7 @@ export class GatewayModel {
   }
 
   async labelCheck(name: string, label: string): Promise<SearchResult> {
-    const { index, body } = gatewayConfig.openquery;
+    const { index, body } = gatewayConfig.getLabelCheckConfig();
 
     switch (name) {
       case 'popquery':

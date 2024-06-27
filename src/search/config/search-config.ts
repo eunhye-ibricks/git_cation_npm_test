@@ -1,4 +1,4 @@
-import { SearchConfig } from '../search.interfaces';
+import { SearchBody, SearchConfig } from '../search.interfaces';
 
 export const simpleConfig = (): SearchConfig => {
   const index = ['news', 'stock'];
@@ -12,7 +12,7 @@ export const simpleConfig = (): SearchConfig => {
     },
   };
 
-  const body = {
+  const body: SearchBody = {
     query: {
       bool: {
         must: [],
@@ -25,8 +25,6 @@ export const simpleConfig = (): SearchConfig => {
     highlight: {
       fields: fields.highlight,
     },
-    from: 0,
-    size: 10,
   };
 
   return {

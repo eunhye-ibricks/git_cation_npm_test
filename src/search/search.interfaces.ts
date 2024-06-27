@@ -8,11 +8,11 @@ export interface SearchResult {
 
 export interface BoolQuery {
   bool: {
-    must?: Array<MatchQuery> | Array<MultiMatchQuery>;
+    must?: MatchQuery[] | MultiMatchQuery[];
 
-    filter?: Array<{
+    filter?: {
       range: { [field: string]: { gte: number; lte: number } };
-    }>;
+    }[];
     // 기타 필요한 필드
   };
 }
@@ -47,7 +47,7 @@ export interface RangeQuery {
 }
 
 export interface SortQuery {
-  sort: Array<{ [key: string]: { order: 'asc' | 'desc' } }>;
+  sort: { [key: string]: { order: 'asc' | 'desc' } }[];
 }
 
 export interface HighlightQuery {
@@ -57,8 +57,8 @@ export interface HighlightQuery {
 }
 
 export interface SourceQuery {
-  includes?: Array<string>;
-  excludes?: Array<string>;
+  includes?: string[];
+  excludes?: string[];
 }
 
 export enum DateExpression {
@@ -72,11 +72,11 @@ export enum DateExpression {
 }
 
 export interface SearchConfig {
-  index: Array<string>;
+  index: string[];
   fields: {
-    search: Array<string>;
+    search: string[];
     highlight: { [key: string]: any };
-    result: Array<string>;
+    result: string[];
   };
   body: SearchBody;
 }
