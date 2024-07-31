@@ -3,7 +3,7 @@ import { SearchService } from './search.service';
 import { SimpleSearchDTO } from './dto/simple-search.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseCommonDTO } from './dto/response.common.dto';
-import { WinstonLoggerService } from 'src/utils/logger/winston.service';
+import { WinstonLoggerService } from '../utils/logger/winston.service';
 
 @Controller('search')
 @ApiTags('search')

@@ -1,7 +1,7 @@
 import { ApiResponse } from '@elastic/elasticsearch';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { WinstonLoggerService } from 'src/utils/logger/winston.service';
+import { WinstonLoggerService } from '../../utils/logger/winston.service';
 
 @Injectable()
 export class SpellerModel {

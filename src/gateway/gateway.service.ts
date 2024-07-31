@@ -15,7 +15,7 @@ import {
 import template from 'string-placeholder';
 import { SpellerService } from './speller/speller.service';
 import { SearchResult } from './gateway.interfaces';
-import { WinstonLoggerService } from 'src/utils/logger/winston.service';
+import { WinstonLoggerService } from '../utils/logger/winston.service';
 
 @Injectable()
 export class GatewayService {

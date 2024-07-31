@@ -1,5 +1,5 @@
 import { LoggerService } from '@nestjs/common';
-import config from 'config/configuration';
+import config from '../../../config/configuration';
 const loggerConfig = config().logger;
 
 import * as winston from 'winston';

@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { SearchModel } from './search.model';
 import { GatewayService } from '../gateway/gateway.service';
 import { ResponseCommonDTO } from './dto/response.common.dto';
-import { WinstonLoggerService } from 'src/utils/logger/winston.service';
+import { WinstonLoggerService } from '../utils/logger/winston.service';
 @Injectable()
 export class SearchService {
   constructor(

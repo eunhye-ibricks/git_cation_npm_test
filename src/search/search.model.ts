@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import * as searchConfig from './config/search-config';
 import { SearchResult } from './search.interfaces';
-import { WinstonLoggerService } from 'src/utils/logger/winston.service';
+import { WinstonLoggerService } from '../utils/logger/winston.service';
 
 @Injectable()
 export class SearchModel {

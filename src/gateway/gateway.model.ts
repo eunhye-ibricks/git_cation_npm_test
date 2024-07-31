@@ -9,7 +9,7 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import _moment from 'moment';
 import { SearchResult } from './gateway.interfaces';
-import { WinstonLoggerService } from 'src/utils/logger/winston.service';
+import { WinstonLoggerService } from '../utils/logger/winston.service';
 
 @Injectable()
 export class GatewayModel {

@@ -16,7 +16,7 @@ import {
   ElasticsearchClientError,
   ResponseError,
 } from '@elastic/elasticsearch/lib/errors';
-import { WinstonLoggerService } from 'src/utils/logger/winston.service';
+import { WinstonLoggerService } from '../../utils/logger/winston.service';
 
 @Injectable()
 export class SpellerService implements OnModuleInit {
