@@ -9,6 +9,7 @@ import { GatewayModule } from './gateway/gateway.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import configuration from 'config/configuration';
 import { LoggerMiddleware } from './utils/middleware/logger.middleware';
+import { SampleModule } from './sample/sample.module';
 @Module({
   imports: [
     SearchModule,
@@ -20,6 +21,7 @@ import { LoggerMiddleware } from './utils/middleware/logger.middleware';
       validationSchema,
     }),
     ScheduleModule.forRoot(),
+    SampleModule,
   ],
   controllers: [AppController],
   providers: [AppService, Logger],
