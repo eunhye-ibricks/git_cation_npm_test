@@ -1,7 +1,6 @@
 import {
   Inject,
   Injectable,
-  LoggerService,
   Logger,
   BadRequestException,
 } from '@nestjs/common';
@@ -16,11 +15,12 @@ import {
 import template from 'string-placeholder';
 import { SpellerService } from './speller/speller.service';
 import { SearchResult } from './gateway.interfaces';
+import { WinstonLoggerService } from 'src/utils/logger/winston.service';
 
 @Injectable()
 export class GatewayService {
   constructor(
-    @Inject(Logger) private readonly logger: LoggerService,
+    @Inject(Logger) private readonly logger: WinstonLoggerService,
     private readonly gatewayModel: GatewayModel,
     private readonly spellerService: SpellerService,
   ) {}

@@ -3,18 +3,18 @@ import {
   Inject,
   Injectable,
   Logger,
-  LoggerService,
 } from '@nestjs/common';
 import * as gatewayConfig from './config/gateway.config';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import _moment from 'moment';
 import { SearchResult } from './gateway.interfaces';
+import { WinstonLoggerService } from 'src/utils/logger/winston.service';
 
 @Injectable()
 export class GatewayModel {
   constructor(
-    @Inject(Logger) private readonly logger: LoggerService,
+    @Inject(Logger) private readonly logger: WinstonLoggerService,
     private readonly esService: ElasticsearchService,
   ) {}
 
@@ -137,12 +137,11 @@ export class GatewayModel {
         err instanceof ResponseError &&
         err.message === 'index_not_found_exception'
       ) {
-        this.logger.error(JSON.stringify(err));
+        this.logger.error(err);
         throw new BadRequestException('해당 label이 존재하지 않습니다.');
       }
       throw err;
     }
-    this.logger.debug(JSON.stringify(body));
   }
 
   async querylog(

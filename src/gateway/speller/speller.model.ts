@@ -1,11 +1,12 @@
 import { ApiResponse } from '@elastic/elasticsearch';
-import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
+import { WinstonLoggerService } from 'src/utils/logger/winston.service';
 
 @Injectable()
 export class SpellerModel {
   constructor(
-    @Inject(Logger) private readonly logger: LoggerService,
+    @Inject(Logger) private readonly logger: WinstonLoggerService,
     private readonly esService: ElasticsearchService,
   ) {}
 

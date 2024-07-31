@@ -1,15 +1,10 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  LoggerService,
-  NestMiddleware,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { WinstonLoggerService } from '../logger/winston.service';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
-  constructor(@Inject(Logger) private readonly logger: LoggerService) {}
+  constructor(@Inject(Logger) private readonly logger: WinstonLoggerService) {}
   use(req: Request, res: Response, next: NextFunction): void {
     const startTime = Date.now();
 

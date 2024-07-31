@@ -3,7 +3,6 @@ import {
   Inject,
   Injectable,
   Logger,
-  LoggerService,
   OnModuleInit,
 } from '@nestjs/common';
 import { SpellerModel } from './speller.model';
@@ -17,11 +16,12 @@ import {
   ElasticsearchClientError,
   ResponseError,
 } from '@elastic/elasticsearch/lib/errors';
+import { WinstonLoggerService } from 'src/utils/logger/winston.service';
 
 @Injectable()
 export class SpellerService implements OnModuleInit {
   constructor(
-    @Inject(Logger) private readonly logger: LoggerService,
+    @Inject(Logger) private readonly logger: WinstonLoggerService,
     private readonly spellerModel: SpellerModel,
   ) {}
   private speller: any = {};
@@ -190,7 +190,7 @@ export class SpellerService implements OnModuleInit {
       }
       this.done(label, newinstance);
     } catch (err) {
-      this.logger.log(err);
+      this.logger.error(err);
       throw err;
     }
   }

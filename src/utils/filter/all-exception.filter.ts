@@ -5,15 +5,15 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  LoggerService,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import { WinstonLoggerService } from '../logger/winston.service';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   constructor(
     private readonly httpAdapterHost: HttpAdapterHost,
-    private readonly logger: LoggerService,
+    private readonly logger: WinstonLoggerService,
   ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -52,7 +52,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
 
     this.logger.error(exception);
-    this.logger.error('Error Info:', errorInfo);
+    this.logger.error(JSON.stringify(errorInfo));
 
     httpAdapter.reply(ctx.getResponse(), responseBody, responseBody.statusCode);
   }

@@ -1,14 +1,15 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { logger } from './utils/logger/winston';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 import { config as swaggerConfig } from './utils/swagger/swagger.config';
 import { AllExceptionsFilter } from './utils/filter/all-exception.filter';
 import { terminate } from './utils/process/terminate';
+import { WinstonLoggerService } from './utils/logger/winston.service';
 
 async function bootstrap() {
+  const logger = new WinstonLoggerService();
   const app = await NestFactory.create(AppModule, {
     logger,
   });

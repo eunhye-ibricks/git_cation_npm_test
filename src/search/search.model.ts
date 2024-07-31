@@ -1,12 +1,13 @@
-import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import * as searchConfig from './config/search-config';
 import { SearchResult } from './search.interfaces';
+import { WinstonLoggerService } from 'src/utils/logger/winston.service';
 
 @Injectable()
 export class SearchModel {
   constructor(
-    @Inject(Logger) private readonly logger: LoggerService,
+    @Inject(Logger) private readonly logger: WinstonLoggerService,
     private readonly esService: ElasticsearchService,
   ) {}
   async simpleSearch(
@@ -29,7 +30,7 @@ export class SearchModel {
     body.size = size;
     body.from = from;
 
-    this.logger.log('simpleSearch()', JSON.stringify({ index, body }));
+    this.logger.log(`simpleSearch() ${JSON.stringify({ index, body })}`);
     const esResult = await this.esService.search({
       index,
       body,

@@ -1,21 +1,15 @@
-import {
-  Controller,
-  Get,
-  Inject,
-  Logger,
-  LoggerService,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Inject, Logger, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { SimpleSearchDTO } from './dto/simple-search.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseCommonDTO } from './dto/response.common.dto';
+import { WinstonLoggerService } from 'src/utils/logger/winston.service';
 
 @Controller('search')
 @ApiTags('search')
 export class SearchController {
   constructor(
-    @Inject(Logger) private readonly logger: LoggerService,
+    @Inject(Logger) private readonly logger: WinstonLoggerService,
     private readonly searchService: SearchService,
   ) {}
 

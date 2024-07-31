@@ -4,7 +4,6 @@ import {
   Get,
   Inject,
   Logger,
-  LoggerService,
   Post,
   Query,
 } from '@nestjs/common';
@@ -19,12 +18,13 @@ import { AutocompleteDTO } from './dto/gateway.autocomplete.dto';
 import { ThemeDTO } from './dto/gateway.theme.dto';
 import { SpellerDTO } from './dto/gateway.speller.dto';
 import { QuerylogDTO } from './dto/gateway.querylog.dto';
+import { WinstonLoggerService } from 'src/utils/logger/winston.service';
 
 @Controller('gateway')
 @ApiTags('gateway')
 export class GatewayController {
   constructor(
-    @Inject(Logger) private readonly logger: LoggerService,
+    @Inject(Logger) private readonly logger: WinstonLoggerService,
     private readonly gatewayService: GatewayService,
   ) {}
 
