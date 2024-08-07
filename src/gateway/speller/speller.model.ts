@@ -49,7 +49,10 @@ export class SpellerModel {
     return { esResult, index };
   }
 
-  async getSpellerData(label: string, scrollId: string): Promise<SearchResult> {
+  async getSpellerData(
+    label: string,
+    scrollId: string | null,
+  ): Promise<SearchResult> {
     const index = '.openquery-speller';
     const scrollTime = '30s';
 

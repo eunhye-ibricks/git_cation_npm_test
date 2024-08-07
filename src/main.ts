@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -26,12 +27,16 @@ async function bootstrap() {
   process.on('exit', exitHandler(0, 'process.exit()'));
 
   const configService = app.get(ConfigService);
+  const env = configService.get<string>('NODE_ENV')!;
+  const port = configService.get<number>('APP_PORT')!;
+  const esNodes = configService.get<string>('ELASTICSEARCH_NODES')!;
+
   logger.log(
     '*************************** Config ***************************\n',
   );
-  logger.log(`ENV: ${configService.get('NODE_ENV')}`);
-  logger.log(`Port: ${configService.get('APP_PORT')}`);
-  logger.log(`ES Nodes: ${configService.get('ELASTICSEARCH_NODES')}\n`);
+  logger.log(`ENV: ${env}`);
+  logger.log(`Port: ${port}`);
+  logger.log(`ES Nodes: ${esNodes}\n`);
   logger.log('**************************** End *****************************');
 
   const httpAdapter: HttpAdapterHost = app.get(HttpAdapterHost);
@@ -45,6 +50,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // app.enableShutdownHooks();
-  await app.listen(configService.get('APP_PORT'));
+
+  await app.listen(port);
 }
 bootstrap();

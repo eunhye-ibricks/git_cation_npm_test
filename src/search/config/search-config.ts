@@ -25,6 +25,8 @@ export const simpleConfig = (): SearchConfig => {
     highlight: {
       fields: fields.highlight,
     },
+    size: 10,
+    from: 0,
   };
 
   return {

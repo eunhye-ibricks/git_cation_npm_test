@@ -9,8 +9,13 @@ import { SpellerModule } from './speller/speller.module';
 @Module({
   imports: [
     ElasticsearchModule.registerAsync({
-      useFactory: async (configService: ConfigService) =>
-        configService.get('elasticsearch'),
+      useFactory: async (configService: ConfigService) => {
+        const esConfig = configService.get('elasticsearch');
+        if (!esConfig) {
+          throw new Error('elasticsearch configuration not found!!!');
+        }
+        return esConfig;
+      },
       inject: [ConfigService],
     }),
     SpellerModule,

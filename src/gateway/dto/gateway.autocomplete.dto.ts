@@ -9,6 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { BadRequestException } from '@nestjs/common';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AutocompleteDTO {
   @Transform((params) => params.value.trim())
@@ -21,6 +22,7 @@ export class AutocompleteDTO {
   @IsString()
   readonly keyword: string;
 
+  @ApiPropertyOptional()
   @Transform((params) => {
     if (params.value === 'true') return true;
     if (params.value === 'false' || params.value === '') return false;
@@ -28,21 +30,25 @@ export class AutocompleteDTO {
   })
   @IsBoolean()
   @IsOptional()
-  readonly middle?: boolean = false;
+  readonly middle: boolean = false;
 
+  @ApiPropertyOptional()
   @Transform((params) => {
     if (params.value === 'true') return true;
     if (params.value === 'false' || params.value === '') return false;
     throw new BadRequestException(['reverse must be a boolean value']);
   })
   @IsBoolean()
-  readonly reverse?: boolean = false;
+  readonly reverse: boolean = false;
 
+  @ApiPropertyOptional()
   @Transform((params) => parseInt(params.value))
   @IsInt()
   @Min(0)
-  readonly size?: number = 10;
+  @IsOptional()
+  readonly size: number = 10;
 
+  @ApiPropertyOptional()
   @IsIn(['keyword', 'weight'])
-  readonly sort?: string = 'keyword';
+  readonly sort: 'keyword' | 'weight' = 'keyword';
 }

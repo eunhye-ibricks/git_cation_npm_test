@@ -41,6 +41,8 @@ export const functionScoreConfig = (): FunctionScoreQuery => {
     highlight: {
       fields: fields.highlight,
     },
+    size: 10,
+    from: 0,
   };
 
   return {

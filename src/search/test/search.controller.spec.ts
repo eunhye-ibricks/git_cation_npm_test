@@ -26,7 +26,7 @@ describe('SearchController', () => {
           validationSchema,
         }),
         ElasticsearchModule.registerAsync({
-          useFactory: async (configService: ConfigService) =>
+          useFactory: async (configService) =>
             configService.get('elasticsearch'),
           inject: [ConfigService],
         }),

@@ -10,6 +10,12 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import _moment from 'moment';
 import { SearchResult } from './gateway.interfaces';
 import { WinstonLoggerService } from '../utils/logger/winston.service';
+import { AutocompleteDTO } from './dto/gateway.autocomplete.dto';
+import { HotqueryDTO } from './dto/gateway.hotquery.dto';
+import { RecommendDTO } from './dto/gateway.recommend.dto';
+import { RelatedDTO } from './dto/gateway.related.dto';
+import { ThemeDTO } from './dto/gateway.theme.dto';
+import { QuerylogDTO } from './dto/gateway.querylog.dto';
 
 @Injectable()
 export class GatewayModel {
@@ -29,10 +35,10 @@ export class GatewayModel {
     return { esResult, index };
   }
 
-  async hotquery(label: string): Promise<SearchResult> {
+  async hotquery(dto: HotqueryDTO): Promise<SearchResult> {
     const { index, body } = gatewayConfig.hotquery();
 
-    body.query.term.label = label;
+    body.query.term.label = dto.label;
 
     const esResult = await this.esService.search({ index, body });
     this.logger.debug(esResult.body);
@@ -40,12 +46,12 @@ export class GatewayModel {
     return { esResult, index };
   }
 
-  async recommend(label: string, keyword: string): Promise<SearchResult> {
+  async recommend(dto: RecommendDTO): Promise<SearchResult> {
     const { index, body } = gatewayConfig.recommend();
 
     body.query.bool.must.push(
-      { match: { label: label } },
-      { match: { 'keyword.keyword': keyword } },
+      { match: { label: dto.label } },
+      { match: { 'keyword.keyword': dto.keyword } },
     );
 
     const esResult = await this.esService.search({ index, body });
@@ -54,12 +60,12 @@ export class GatewayModel {
     return { esResult, index };
   }
 
-  async related(label: string, keyword: string): Promise<SearchResult> {
+  async related(dto: RelatedDTO): Promise<SearchResult> {
     const { index, body } = gatewayConfig.related();
 
     body.query.bool.must.push(
-      { match: { label: label } },
-      { match: { 'keyword.keyword': keyword } },
+      { match: { label: dto.label } },
+      { match: { 'keyword.keyword': dto.keyword } },
     );
 
     const esResult = await this.esService.search({ index, body });
@@ -68,12 +74,12 @@ export class GatewayModel {
     return { esResult, index };
   }
 
-  async theme(label: string, keyword: string): Promise<SearchResult> {
+  async theme(dto: ThemeDTO): Promise<SearchResult> {
     const { index, body } = gatewayConfig.theme();
 
     body.query.bool.must.push(
-      { match: { 'keywords.keyword': keyword } },
-      { match: { label: label } },
+      { match: { 'keywords.keyword': dto.keyword } },
+      { match: { label: dto.label } },
     );
 
     this.logger.log(JSON.stringify(body));
@@ -82,30 +88,23 @@ export class GatewayModel {
     return { esResult, index };
   }
 
-  async autocomplete(
-    label: string,
-    keyword: string,
-    middle: boolean,
-    reverse: boolean,
-    size: number,
-    sort: string,
-  ): Promise<SearchResult> {
-    const index = gatewayConfig.autocomplete().index + label;
+  async autocomplete(dto: AutocompleteDTO): Promise<SearchResult> {
+    const index = gatewayConfig.autocomplete().index + dto.label;
     const { body } = gatewayConfig.autocomplete();
 
     const keywordFields: string[] = [];
     keywordFields.push('keyword.autocomplete');
     keywordFields.push('keyword.prefix^10');
 
-    if (middle) {
+    if (dto.middle) {
       keywordFields.push('keyword.autocomplete_middle');
     }
 
-    if (reverse) {
+    if (dto.reverse) {
       keywordFields.push('keyword.autocomplete_reverse');
     }
 
-    switch (sort) {
+    switch (dto.sort) {
       case 'keyword':
         body.sort = [
           { _score: { order: 'desc' } },
@@ -120,9 +119,9 @@ export class GatewayModel {
         ];
         break;
     }
-    body.size = size;
+    body.size = dto.size;
     body.query.multi_match = {
-      query: keyword,
+      query: dto.keyword,
       fields: keywordFields,
     };
 
@@ -144,13 +143,8 @@ export class GatewayModel {
     }
   }
 
-  async querylog(
-    index: string,
-    query: string,
-    total: number,
-    took: number,
-  ): Promise<SearchResult> {
-    const indices = index
+  async querylog(dto: QuerylogDTO): Promise<SearchResult> {
+    const indices = dto.index
       .split(',')
       .map((s) => s.trim())
       .sort((a, b) => {
@@ -165,9 +159,9 @@ export class GatewayModel {
     const body = {
       indices,
       timestamp,
-      query,
-      total,
-      took,
+      query: dto.query,
+      total: dto.total,
+      took: dto.took,
     };
 
     const esResult = await this.esService.index({
@@ -177,7 +171,7 @@ export class GatewayModel {
       body,
     });
 
-    return { esResult, index };
+    return { esResult, index: dto.index };
   }
 
   async labelCheck(name: string, label: string): Promise<SearchResult> {

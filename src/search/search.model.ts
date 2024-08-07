@@ -3,6 +3,7 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import * as searchConfig from './config/search-config';
 import { SearchResult } from './search.interfaces';
 import { WinstonLoggerService } from '../utils/logger/winston.service';
+import { SimpleSearchDTO } from './dto/simple-search.dto';
 
 @Injectable()
 export class SearchModel {
@@ -10,11 +11,7 @@ export class SearchModel {
     @Inject(Logger) private readonly logger: WinstonLoggerService,
     private readonly esService: ElasticsearchService,
   ) {}
-  async simpleSearch(
-    keyword: string,
-    size: number,
-    from: number,
-  ): Promise<SearchResult> {
+  async simpleSearch(dto: SimpleSearchDTO): Promise<SearchResult> {
     const simpleConfig = searchConfig.simpleConfig();
     const index = simpleConfig.index.join(',');
     const { fields, body } = simpleConfig;
@@ -22,13 +19,14 @@ export class SearchModel {
     body.query.bool.must.push({
       multi_match: {
         fields: simpleConfig.fields.search,
-        query: keyword,
+        query: dto.keyword,
       },
     });
 
     body._source.includes = fields.result;
-    body.size = size;
-    body.from = from;
+
+    body.size = dto.size;
+    body.from = dto.from;
 
     this.logger.log(`simpleSearch() ${JSON.stringify({ index, body })}`);
     const esResult = await this.esService.search({

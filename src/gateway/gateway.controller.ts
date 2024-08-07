@@ -36,8 +36,7 @@ export class GatewayController {
     isArray: true,
   })
   async popquery(@Query() dto: PopqueryDTO) {
-    const { label } = dto;
-    return await this.gatewayService.popquery(label);
+    return await this.gatewayService.popquery(dto);
   }
 
   @Get('/hotquery')
@@ -48,8 +47,7 @@ export class GatewayController {
     isArray: true,
   })
   async hotquery(@Query() dto: HotqueryDTO) {
-    const { label } = dto;
-    return await this.gatewayService.hotquery(label);
+    return await this.gatewayService.hotquery(dto);
   }
 
   @Get('/recommend')
@@ -60,8 +58,7 @@ export class GatewayController {
     isArray: true,
   })
   async recommend(@Query() dto: RecommendDTO) {
-    const { label, keyword } = dto;
-    return await this.gatewayService.recommend(label, keyword);
+    return await this.gatewayService.recommend(dto);
   }
 
   @Get('/related')
@@ -72,8 +69,7 @@ export class GatewayController {
     isArray: true,
   })
   async related(@Query() dto: RelatedDTO) {
-    const { label, keyword } = dto;
-    return await this.gatewayService.related(label, keyword);
+    return await this.gatewayService.related(dto);
   }
 
   @Get('/theme')
@@ -84,8 +80,7 @@ export class GatewayController {
     isArray: false,
   })
   async theme(@Query() dto: ThemeDTO) {
-    const { label, keyword } = dto;
-    return await this.gatewayService.theme(label, keyword);
+    return await this.gatewayService.theme(dto);
   }
 
   @Get('/autocomplete')
@@ -96,15 +91,7 @@ export class GatewayController {
     isArray: true,
   })
   async autocomplete(@Query() dto: AutocompleteDTO) {
-    const { label, keyword, middle, reverse, size, sort } = dto;
-    return await this.gatewayService.autocomplete(
-      label,
-      keyword,
-      middle,
-      reverse,
-      size,
-      sort,
-    );
+    return await this.gatewayService.autocomplete(dto);
   }
 
   @Get('/speller')
@@ -115,14 +102,7 @@ export class GatewayController {
     // isArray: true,
   })
   async speller(@Query() dto: SpellerDTO) {
-    const { label, query, distance, eng2kor, overflow } = dto;
-    return await this.gatewayService.speller(
-      label,
-      query,
-      distance,
-      eng2kor,
-      overflow,
-    );
+    return await this.gatewayService.speller(dto);
   }
 
   @Post('querylog')
@@ -131,7 +111,6 @@ export class GatewayController {
     description: 'success',
   })
   async querylog(@Body() dto: QuerylogDTO) {
-    const { index, query, total, took } = dto;
-    return await this.gatewayService.querylog(index, query, total, took);
+    return await this.gatewayService.querylog(dto);
   }
 }

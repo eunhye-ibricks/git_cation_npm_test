@@ -265,7 +265,7 @@ hook.english_to_hangul = function (str: string) {
     i++;
 
     // jungseong
-    let jung;
+    let jung: any;
     let temp_jung =
       i + 2 > str.length ? undefined : eng_jungseong[str.substr(i, 2)];
     if (temp_jung !== undefined) {
@@ -277,7 +277,7 @@ hook.english_to_hangul = function (str: string) {
     }
 
     // jongseong
-    let jong;
+    let jong: any;
     const temp_jong =
       i + 2 > str.length ? undefined : eng_jongseong[str.substr(i, 2)];
     if (temp_jong !== undefined) {

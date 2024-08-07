@@ -37,11 +37,14 @@ export class FunctionScoreService {
     };
 
     this.logger.log('response', JSON.stringify({ index, took, total }));
-    this.gatewayService.querylog(index, query, total, took).catch((err) => {
-      this.logger.error('querylog faild');
-      this.logger.error(err);
-      this.logger.error({ index, query, total, took });
-    });
+    this.gatewayService
+      .querylog({ index, query, total, took })
+      .then()
+      .catch((err) => {
+        this.logger.error('querylog faild');
+        this.logger.error(err);
+        this.logger.error({ index, query, total, took });
+      });
     return response;
   }
 }

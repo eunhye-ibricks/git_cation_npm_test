@@ -83,9 +83,9 @@ export interface SearchConfig {
 
 export interface SearchBody {
   query: any;
-  size?: number;
-  from?: number;
-  _source?: SourceQuery;
+  size: number;
+  from: number;
+  _source: SourceQuery;
   highlight?: HighlightQuery;
   sort?: SortQuery;
 }

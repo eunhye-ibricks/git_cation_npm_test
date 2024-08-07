@@ -22,7 +22,6 @@ export class SearchController {
   async simpleSearch(
     @Query() dto: SimpleSearchDTO,
   ): Promise<ResponseCommonDTO> {
-    const { keyword, size, from } = dto;
-    return await this.searchService.simpleSearch(keyword, size, from);
+    return await this.searchService.simpleSearch(dto);
   }
 }

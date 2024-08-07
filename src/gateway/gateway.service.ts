@@ -16,6 +16,14 @@ import template from 'string-placeholder';
 import { SpellerService } from './speller/speller.service';
 import { SearchResult } from './gateway.interfaces';
 import { WinstonLoggerService } from '../utils/logger/winston.service';
+import { AutocompleteDTO } from './dto/gateway.autocomplete.dto';
+import { PopqueryDTO } from './dto/gateway.popquery.dto';
+import { HotqueryDTO } from './dto/gateway.hotquery.dto';
+import { RecommendDTO } from './dto/gateway.recommend.dto';
+import { RelatedDTO } from './dto/gateway.related.dto';
+import { ThemeDTO } from './dto/gateway.theme.dto';
+import { SpellerDTO } from './dto/gateway.speller.dto';
+import { QuerylogDTO } from './dto/gateway.querylog.dto';
 
 @Injectable()
 export class GatewayService {
@@ -25,12 +33,12 @@ export class GatewayService {
     private readonly spellerService: SpellerService,
   ) {}
 
-  async popquery(label: string): Promise<PopqueryResponseDTO[]> {
+  async popquery(dto: PopqueryDTO): Promise<PopqueryResponseDTO[]> {
     const { name } = gatewayConfig.popquery;
-    const { esResult } = await this.gatewayModel.popquery(label);
+    const { esResult } = await this.gatewayModel.popquery(dto.label);
 
     if (esResult.body.hits.hits.length === 0) {
-      return await this.handleZeroResult(name, label);
+      return await this.handleZeroResult(name, dto.label);
     }
 
     const result = JSON.parse(esResult.body.hits.hits[0]._source.popqueryJSON);
@@ -38,24 +46,24 @@ export class GatewayService {
     return result;
   }
 
-  async hotquery(label: string): Promise<HotqueryResponseDTO[]> {
+  async hotquery(dto: HotqueryDTO): Promise<HotqueryResponseDTO[]> {
     const { name } = gatewayConfig.hotquery;
-    const { esResult } = await this.gatewayModel.hotquery(label);
+    const { esResult } = await this.gatewayModel.hotquery(dto);
 
     if (esResult.body.hits.hits.length === 0) {
-      return await this.handleZeroResult(name, label);
+      return await this.handleZeroResult(name, dto.label);
     }
     const result = JSON.parse(esResult.body.hits.hits[0]._source.hotqueryJSON);
 
     return result;
   }
 
-  async recommend(label: string, keyword: string): Promise<string[]> {
+  async recommend(dto: RecommendDTO): Promise<string[]> {
     const { name } = gatewayConfig.recommend;
-    const { esResult } = await this.gatewayModel.recommend(label, keyword);
+    const { esResult } = await this.gatewayModel.recommend(dto);
 
     if (esResult.body.hits.hits.length === 0) {
-      return await this.handleZeroResult(name, label);
+      return await this.handleZeroResult(name, dto.label);
     }
 
     const recommend = esResult.body.hits.hits[0]._source.recommend;
@@ -67,12 +75,12 @@ export class GatewayService {
     return result;
   }
 
-  async related(label: string, keyword: string): Promise<string[]> {
+  async related(dto: RelatedDTO): Promise<string[]> {
     const { name } = gatewayConfig.related;
-    const { esResult } = await this.gatewayModel.related(label, keyword);
+    const { esResult } = await this.gatewayModel.related(dto);
 
     if (esResult.body.hits.hits.length === 0) {
-      return await this.handleZeroResult(name, label);
+      return await this.handleZeroResult(name, dto.label);
     }
 
     const related = esResult.body.hits.hits[0]._source.related;
@@ -84,12 +92,12 @@ export class GatewayService {
     return result;
   }
 
-  async theme(label: string, keyword: string): Promise<string | []> {
+  async theme(dto: ThemeDTO): Promise<string | []> {
     const { name } = gatewayConfig.theme;
-    const { esResult } = await this.gatewayModel.theme(label, keyword);
+    const { esResult } = await this.gatewayModel.theme(dto);
 
     if (esResult.body.hits.hits.length === 0) {
-      return await this.handleZeroResult(name, label);
+      return await this.handleZeroResult(name, dto.label);
     }
     const item = esResult.body.hits.hits[0]._source;
 
@@ -106,28 +114,14 @@ export class GatewayService {
     return theme;
   }
 
-  async autocomplete(
-    label: string,
-    keyword: string,
-    middle: boolean,
-    reverse: boolean,
-    size: number,
-    sort: string,
-  ): Promise<AutocompleteResponseDTO[]> {
+  async autocomplete(dto: AutocompleteDTO): Promise<AutocompleteResponseDTO[]> {
     const { name } = gatewayConfig.autocomplete;
     const autocompleteArr: AutocompleteResponseDTO[] = [];
-    const { esResult, meta } = await this.gatewayModel.autocomplete(
-      label,
-      keyword,
-      middle,
-      reverse,
-      size,
-      sort,
-    );
+    const { esResult, meta } = await this.gatewayModel.autocomplete(dto);
 
     const keywordFields = meta.keywordFields;
     if (esResult.body.hits.hits.length === 0) {
-      return await this.handleZeroResult(name, label);
+      return await this.handleZeroResult(name, dto.label);
     }
 
     esResult.body.hits.hits.forEach((hit: any) => {
@@ -150,22 +144,16 @@ export class GatewayService {
     return autocompleteArr;
   }
 
-  async speller(
-    label: string,
-    query: string,
-    distance: number,
-    eng2kor: boolean,
-    overflow: boolean,
-  ): Promise<SpellerResponse> {
+  async speller(dto: SpellerDTO): Promise<SpellerResponse> {
     let correction = '';
-    const arr = query.split(/[ \t]/);
+    const arr = dto.query.split(/[ \t]/);
     for (let i = 0; i < arr.length; i++) {
       const results = await this.spellerService.correct(
-        label,
+        dto.label,
         arr[i],
-        eng2kor,
-        distance,
-        overflow,
+        dto.eng2kor,
+        dto.distance,
+        dto.overflow,
       );
       if (correction.length > 0) {
         correction += ' ';
@@ -177,13 +165,8 @@ export class GatewayService {
     };
   }
 
-  async querylog(
-    index: string,
-    query: string,
-    total: number,
-    took: number,
-  ): Promise<SearchResult> {
-    const result = await this.gatewayModel.querylog(index, query, total, took);
+  async querylog(dto: QuerylogDTO): Promise<SearchResult> {
+    const result = await this.gatewayModel.querylog(dto);
     return result;
   }
 
