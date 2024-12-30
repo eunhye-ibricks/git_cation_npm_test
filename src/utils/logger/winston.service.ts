@@ -17,7 +17,7 @@ export class WinstonLoggerService implements LoggerService {
       debug: 'blue',
     };
 
-    const level = loggerConfig.debug ? 'debug' : 'info';
+    const level = loggerConfig.debug ? 'debug' : 'log';
 
     const format = winston.format.combine(
       winston.format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
