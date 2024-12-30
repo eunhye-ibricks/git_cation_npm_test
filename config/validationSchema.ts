@@ -21,10 +21,10 @@ export const validationSchema = Joi.object({
   NODE_ENV: Joi.string()
     .valid('production', 'development', 'test')
     .default('development'),
-  APP_NAME: Joi.string().default('search'),
-  APP_PORT: Joi.number().default(14050),
+  APP_NAME: Joi.string().required(),
+  APP_PORT: Joi.number().required(),
   ELASTICSEARCH_NODES: Joi.string()
     .custom(urlListSchema, 'Node URL Validation')
     .required(),
-  LOG_PATH: Joi.string(),
+  LOG_PATH: Joi.string().required(),
 });
