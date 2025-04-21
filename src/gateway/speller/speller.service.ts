@@ -51,7 +51,7 @@ export class SpellerService implements OnModuleInit {
         return;
       }
 
-      esResult.body.hits.hits.forEach(async (hit: any) => {
+      for (const hit of esResult.body.hits.hits) {
         const label: string = hit._source.speller.label;
 
         if (!this.speller.hasOwnProperty(label)) {
@@ -63,13 +63,13 @@ export class SpellerService implements OnModuleInit {
           };
         }
         await this.checkTimestamp(label);
-      });
+      }
     } catch (error) {
       if (error instanceof ElasticsearchClientError) {
         return this.handleEsError(error);
       }
-
       this.logger.error(error);
+      throw error;
     }
   }
 
