@@ -11,6 +11,7 @@ import { WinstonLoggerService } from './utils/logger/winston.service';
 
 async function bootstrap() {
   const logger = new WinstonLoggerService();
+
   const app = await NestFactory.create(AppModule, {
     logger,
   });
@@ -29,14 +30,16 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const env = configService.get<string>('NODE_ENV')!;
   const port = configService.get<number>('APP_PORT')!;
-  const esNodes = configService.get<string>('ELASTICSEARCH_NODES')!;
+  const searchEngine = configService.get<string>('SEARCH_ENGINE')!;
+  const nodes = configService.get<string>('NODES')!;
 
   logger.log(
     '*************************** Config ***************************\n',
   );
   logger.log(`ENV: ${env}`);
-  logger.log(`Port: ${port}`);
-  logger.log(`ES Nodes: ${esNodes}\n`);
+  logger.log(`App Port: ${port}`);
+  logger.log(`Search Engine: ${searchEngine}`);
+  logger.log(`Nodes: ${nodes}\n`);
   logger.log('**************************** End *****************************');
 
   const httpAdapter: HttpAdapterHost = app.get(HttpAdapterHost);

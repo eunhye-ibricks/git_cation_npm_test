@@ -5,8 +5,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as gatewayConfig from './config/gateway.config';
-import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import _moment from 'moment';
 import { SearchResult } from './gateway.interfaces';
 import { WinstonLoggerService } from '../utils/logger/winston.service';
@@ -16,12 +14,14 @@ import { RecommendDTO } from './dto/gateway.recommend.dto';
 import { RelatedDTO } from './dto/gateway.related.dto';
 import { ThemeDTO } from './dto/gateway.theme.dto';
 import { QuerylogDTO } from './dto/gateway.querylog.dto';
+import { SearchEngine } from 'src/search-engine/search-engine.interface';
+import { isSearchClientError } from '../search-engine/search-engine.errors';
 
 @Injectable()
 export class GatewayModel {
   constructor(
     @Inject(Logger) private readonly logger: WinstonLoggerService,
-    private readonly esService: ElasticsearchService,
+    @Inject('SearchEngine') private readonly searchEngine: SearchEngine,
   ) {}
 
   async popquery(label: string): Promise<SearchResult> {
@@ -29,10 +29,10 @@ export class GatewayModel {
 
     body.query.term.label = label;
 
-    const esResult = await this.esService.search({ index, body });
-    this.logger.debug(esResult.body);
+    const searchResponse = await this.searchEngine.search({ index, body });
+    this.logger.debug(searchResponse.body);
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 
   async hotquery(dto: HotqueryDTO): Promise<SearchResult> {
@@ -40,10 +40,10 @@ export class GatewayModel {
 
     body.query.term.label = dto.label;
 
-    const esResult = await this.esService.search({ index, body });
-    this.logger.debug(esResult.body);
+    const searchResponse = await this.searchEngine.search({ index, body });
+    this.logger.debug(searchResponse.body);
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 
   async recommend(dto: RecommendDTO): Promise<SearchResult> {
@@ -54,10 +54,10 @@ export class GatewayModel {
       { match: { 'keyword.keyword': dto.keyword } },
     );
 
-    const esResult = await this.esService.search({ index, body });
-    this.logger.debug(esResult.body);
+    const searchResponse = await this.searchEngine.search({ index, body });
+    this.logger.debug(searchResponse.body);
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 
   async related(dto: RelatedDTO): Promise<SearchResult> {
@@ -68,10 +68,10 @@ export class GatewayModel {
       { match: { 'keyword.keyword': dto.keyword } },
     );
 
-    const esResult = await this.esService.search({ index, body });
-    this.logger.debug(esResult.body);
+    const searchResponse = await this.searchEngine.search({ index, body });
+    this.logger.debug(searchResponse.body);
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 
   async theme(dto: ThemeDTO): Promise<SearchResult> {
@@ -83,9 +83,9 @@ export class GatewayModel {
     );
 
     this.logger.log(JSON.stringify(body));
-    const esResult = await this.esService.search({ index, body });
+    const searchResponse = await this.searchEngine.search({ index, body });
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 
   async autocomplete(dto: AutocompleteDTO): Promise<SearchResult> {
@@ -129,12 +129,12 @@ export class GatewayModel {
       body.highlight.fields[field] = {};
     });
     try {
-      const esResult = await this.esService.search({ index, body });
-      return { esResult, index, meta: { keywordFields } };
+      const searchResponse = await this.searchEngine.search({ index, body });
+      return { searchResponse, index, meta: { keywordFields } };
     } catch (err) {
       if (
-        err instanceof ResponseError &&
-        err.message === 'index_not_found_exception'
+        isSearchClientError(err) &&
+        err.message.includes('index_not_found_exception')
       ) {
         this.logger.error(err);
         throw new BadRequestException('해당 label이 존재하지 않습니다.');
@@ -164,14 +164,20 @@ export class GatewayModel {
       took: dto.took,
     };
 
-    const esResult = await this.esService.index({
+    const baseParams = {
       refresh: true,
       index: querylogIndex,
-      type: docType,
       body,
-    });
+    };
 
-    return { esResult, index: dto.index };
+    const indexParams =
+      this.searchEngine.engineType === 'opensearch'
+        ? baseParams
+        : { ...baseParams, type: docType };
+
+    const searchResponse = await this.searchEngine.index(indexParams);
+
+    return { searchResponse, index: dto.index };
   }
 
   async labelCheck(name: string, label: string): Promise<SearchResult> {
@@ -195,11 +201,11 @@ export class GatewayModel {
         body.query.term = { 'theme.label': { value: label } };
     }
 
-    const esResult = await this.esService.search({
+    const searchResponse = await this.searchEngine.search({
       index,
       body,
     });
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 }

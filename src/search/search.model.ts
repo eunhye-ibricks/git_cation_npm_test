@@ -1,39 +1,26 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ElasticsearchService } from '@nestjs/elasticsearch';
-import * as searchConfig from './config/search-config';
 import { SearchResult } from './search.interfaces';
 import { WinstonLoggerService } from '../utils/logger/winston.service';
 import { SimpleSearchDTO } from './dto/simple-search.dto';
-
+import { SearchEngine } from 'src/search-engine/search-engine.interface';
+import { simpleConfig } from './search.config';
 @Injectable()
 export class SearchModel {
   constructor(
     @Inject(Logger) private readonly logger: WinstonLoggerService,
-    private readonly esService: ElasticsearchService,
+    @Inject('SearchEngine') private readonly searchEngine: SearchEngine,
   ) {}
+
   async simpleSearch(dto: SimpleSearchDTO): Promise<SearchResult> {
-    const simpleConfig = searchConfig.simpleConfig();
-    const index = simpleConfig.index.join(',');
-    const { fields, body } = simpleConfig;
-
-    body.query.bool.must.push({
-      multi_match: {
-        fields: simpleConfig.fields.search,
-        query: dto.keyword,
-      },
-    });
-
-    body._source.includes = fields.result;
-
-    body.size = dto.size;
-    body.from = dto.from;
+    const searchConfig = simpleConfig(dto);
+    const { body } = searchConfig;
+    const index = Array.isArray(searchConfig.index)
+      ? searchConfig.index.join(',')
+      : searchConfig.index;
 
     this.logger.log(`simpleSearch() ${JSON.stringify({ index, body })}`);
-    const esResult = await this.esService.search({
-      index,
-      body,
-    });
+    const searchResponse = await this.searchEngine.search({ index, body });
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 }

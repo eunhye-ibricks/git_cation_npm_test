@@ -23,8 +23,11 @@ export const validationSchema = Joi.object({
     .default('development'),
   APP_NAME: Joi.string().required(),
   APP_PORT: Joi.number().required(),
-  ELASTICSEARCH_NODES: Joi.string()
-    .custom(urlListSchema, 'Node URL Validation')
-    .required(),
+  NODES: Joi.string().custom(urlListSchema, 'Node URL Validation').required(),
   LOG_PATH: Joi.string(),
+  SEARCH_ENGINE: Joi.string()
+    .valid('opensearch', 'elasticsearch')
+    .default('elasticsearch'),
+  USERNAME: Joi.string(),
+  PASSWORD: Joi.string(),
 });

@@ -4,6 +4,7 @@ import { GatewayService } from '../gateway/gateway.service';
 import { ResponseCommonDTO } from './dto/response.common.dto';
 import { WinstonLoggerService } from '../utils/logger/winston.service';
 import { SimpleSearchDTO } from './dto/simple-search.dto';
+// import { Search_Response } from '@opensearch-project/opensearch/api';
 @Injectable()
 export class SearchService {
   constructor(
@@ -12,16 +13,17 @@ export class SearchService {
     private readonly gatewayService: GatewayService,
   ) {}
   async simpleSearch(dto: SimpleSearchDTO): Promise<ResponseCommonDTO> {
-    const { esResult, index } = await this.searchModel.simpleSearch(dto);
+    const { searchResponse, index } = await this.searchModel.simpleSearch(dto);
 
-    const body = esResult.body.hits.hits.map((item: any) => ({
+    // const body = (searchResponse as Search_Response).body.hits.hits.map(
+    const body = searchResponse.body.hits.hits.map((item: any) => ({
       ...item._source,
       highlight: item.highlight,
     }));
 
     const query = dto.keyword;
-    const took = esResult.body.took;
-    const total = esResult.body.hits.total.value;
+    const took = searchResponse.body.took;
+    const total = searchResponse.body.hits.total.value;
     const response: ResponseCommonDTO = {
       index,
       took,

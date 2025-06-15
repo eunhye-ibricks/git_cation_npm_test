@@ -10,16 +10,19 @@ import { ScheduleModule } from '@nestjs/schedule';
 import configuration from 'config/configuration';
 import { LoggerMiddleware } from './utils/middleware/logger.middleware';
 import { SampleModule } from './sample/sample.module';
+import { SearchEngineModule } from './search-engine/search-engine.module';
+
 @Module({
   imports: [
-    SearchModule,
-    GatewayModule,
     ConfigModule.forRoot({
       envFilePath: [`./config/env/.${process.env.NODE_ENV}.env`],
       load: [configuration],
       isGlobal: true,
       validationSchema,
     }),
+    SearchEngineModule.register(),
+    SearchModule,
+    GatewayModule,
     ScheduleModule.forRoot(),
     SampleModule,
   ],

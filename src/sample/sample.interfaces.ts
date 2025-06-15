@@ -1,7 +1,8 @@
 import { ApiResponse } from '@elastic/elasticsearch';
+import { Search_Response } from '@opensearch-project/opensearch/api';
 
 export interface SampleResult {
-  esResult: ApiResponse;
+  esResult: ApiResponse | Search_Response;
   index: string;
   meta?: any;
 }

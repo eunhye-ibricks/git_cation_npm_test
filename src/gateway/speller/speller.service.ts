@@ -11,12 +11,12 @@ import hangul from './hangul';
 import _moment from 'moment';
 import { Cron } from '@nestjs/schedule';
 import { ApiResponse } from '@elastic/elasticsearch';
-import {
-  ConnectionError,
-  ElasticsearchClientError,
-  ResponseError,
-} from '@elastic/elasticsearch/lib/errors';
 import { WinstonLoggerService } from '../../utils/logger/winston.service';
+import { Search_Response } from '@opensearch-project/opensearch/api';
+import {
+  ErrorNames,
+  isSearchClientError,
+} from '../../search-engine/search-engine.errors';
 
 @Injectable()
 export class SpellerService implements OnModuleInit {
@@ -45,13 +45,13 @@ export class SpellerService implements OnModuleInit {
 
   async update() {
     try {
-      const { esResult } = await this.spellerModel.getSpellerLabel();
+      const { searchResponse } = await this.spellerModel.getSpellerLabel();
 
-      if (esResult.body.hits.hits.length === 0) {
+      if (searchResponse.body.hits.hits.length === 0) {
         return;
       }
 
-      for (const hit of esResult.body.hits.hits) {
+      for (const hit of searchResponse.body.hits.hits) {
         const label: string = hit._source.speller.label;
 
         if (!this.speller.hasOwnProperty(label)) {
@@ -65,8 +65,8 @@ export class SpellerService implements OnModuleInit {
         await this.checkTimestamp(label);
       }
     } catch (error) {
-      if (error instanceof ElasticsearchClientError) {
-        return this.handleEsError(error);
+      if (isSearchClientError(error)) {
+        return this.handleSearchEngineError(error);
       }
       this.logger.error(error);
       throw error;
@@ -144,13 +144,15 @@ export class SpellerService implements OnModuleInit {
   }
 
   private async checkTimestamp(label: string) {
-    const { esResult } = await this.spellerModel.getSpellerTimestamp(label);
-    const total = esResult.body.hits.total.value;
+    const { searchResponse } = await this.spellerModel.getSpellerTimestamp(
+      label,
+    );
+    const total = searchResponse.body.hits.total.value;
 
     if (total === 0) {
       return;
     }
-    const hit = esResult.body.hits.hits[0]._source;
+    const hit = searchResponse.body.hits.hits[0]._source;
     const timestamp = _moment(hit.timestamp);
 
     if (
@@ -171,22 +173,25 @@ export class SpellerService implements OnModuleInit {
 
   private async load(label: string, newinstance: any) {
     try {
-      const { esResult } = await this.spellerModel.getSpellerData(label, null);
-      this.insert(esResult, label, newinstance);
+      const { searchResponse } = await this.spellerModel.getSpellerData(
+        label,
+        null,
+      );
+      this.insert(searchResponse, label, newinstance);
 
-      let count = esResult.body.hits.hits.length;
-      const scrollId: string = esResult.body._scroll_id;
+      let count = searchResponse.body.hits.hits.length;
+      const scrollId: string = searchResponse.body._scroll_id;
 
       while (count > 0) {
         const scrollResult = (
           await this.spellerModel.getSpellerData(label, scrollId)
-        ).esResult;
+        ).searchResponse;
 
         count = scrollResult.body.hits.hits.length;
 
         if (count === 0) break;
 
-        this.insert(esResult, label, newinstance);
+        this.insert(searchResponse, label, newinstance);
       }
       this.done(label, newinstance);
     } catch (err) {
@@ -195,8 +200,12 @@ export class SpellerService implements OnModuleInit {
     }
   }
 
-  private async insert(esResult: ApiResponse, label: string, newinstance: any) {
-    esResult.body.hits.hits.forEach((hit: any) => {
+  private async insert(
+    searchResponse: ApiResponse | Search_Response,
+    label: string,
+    newinstance: any,
+  ) {
+    searchResponse.body.hits.hits.forEach((hit: any) => {
       const jaso = hangul.decompose(hit._source.keyword).join('');
 
       newinstance.ed.insert(jaso, {
@@ -232,15 +241,28 @@ export class SpellerService implements OnModuleInit {
     );
   }
 
-  private handleEsError(error: ElasticsearchClientError): void {
-    if (error instanceof ConnectionError) {
-      this.logger.debug('Speller - Elasticsearch Connection failed');
-    } else if (
-      error instanceof ResponseError &&
-      error.message === 'index_not_found_exception'
+  private handleSearchEngineError(error: any): void {
+    const name = error?.name as keyof typeof ErrorNames;
+    const meta = error?.meta;
+    const message = error?.message;
+
+    if (
+      name === ErrorNames.CONNECTION ||
+      name === ErrorNames.NO_LIVING_CONNECTIONS
     ) {
-      this.logger.debug('no speller index');
-      return;
+      this.logger.debug(`${name}: Search engine connection failed`);
+    } else if (name === ErrorNames.RESPONSE) {
+      const errorType = meta?.body?.error?.type;
+      if (errorType === 'index_not_found_exception') {
+        this.logger.debug(`${name}: No speller index found`);
+      } else {
+        this.logger.warn(
+          `${name}: Unexpected response error: ${errorType ?? 'unknown'}`,
+        );
+        this.logger.warn(error);
+      }
+    } else {
+      this.logger.error(`${name}: ${message}`);
     }
   }
 }

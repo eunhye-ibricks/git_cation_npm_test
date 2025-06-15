@@ -1,17 +1,16 @@
-import { ApiResponse } from '@elastic/elasticsearch';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { WinstonLoggerService } from '../../utils/logger/winston.service';
+import { SearchEngine } from 'src/search-engine/search-engine.interface';
+import { SearchResult } from '../gateway.interfaces';
 
 @Injectable()
 export class SpellerModel {
   constructor(
     @Inject(Logger) private readonly logger: WinstonLoggerService,
-    private readonly esService: ElasticsearchService,
+    @Inject('SearchEngine') private readonly searchEngine: SearchEngine,
   ) {}
 
   async getSpellerLabel(): Promise<SearchResult> {
-    // const { index } = gatewayConfig.openquery;
     const index = '.openquery';
     const body = {
       size: 100,
@@ -22,9 +21,9 @@ export class SpellerModel {
       },
     };
 
-    const esResult = await this.esService.search({ index, body });
+    const searchResponse = await this.searchEngine.search({ index, body });
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 
   async getSpellerTimestamp(label: string): Promise<SearchResult> {
@@ -44,9 +43,9 @@ export class SpellerModel {
         },
       ],
     };
-    const esResult = await this.esService.search({ index, body });
+    const searchResponse = await this.searchEngine.search({ index, body });
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
 
   async getSpellerData(
@@ -73,25 +72,20 @@ export class SpellerModel {
         ],
       };
 
-      const esResult = await this.esService.search({
+      const searchResponse = await this.searchEngine.search({
         index,
         scroll: scrollTime,
         body,
       });
-      return { esResult, index };
+      return { searchResponse, index };
     }
 
-    const esResult = await this.esService.scroll({
+    const searchResponse = await this.searchEngine.scroll({
       scroll_id: scrollId,
       rest_total_hits_as_int: true,
       scroll: '30s',
     });
 
-    return { esResult, index };
+    return { searchResponse, index };
   }
-}
-
-interface SearchResult {
-  esResult: ApiResponse;
-  index: string;
 }

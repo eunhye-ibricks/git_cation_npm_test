@@ -35,38 +35,42 @@ export class GatewayService {
 
   async popquery(dto: PopqueryDTO): Promise<PopqueryResponseDTO[]> {
     const { name } = gatewayConfig.popquery;
-    const { esResult } = await this.gatewayModel.popquery(dto.label);
+    const { searchResponse } = await this.gatewayModel.popquery(dto.label);
 
-    if (esResult.body.hits.hits.length === 0) {
+    if (searchResponse.body.hits.hits.length === 0) {
       return await this.handleZeroResult(name, dto.label);
     }
 
-    const result = JSON.parse(esResult.body.hits.hits[0]._source.popqueryJSON);
+    const result = JSON.parse(
+      searchResponse.body.hits.hits[0]._source.popqueryJSON,
+    );
 
     return result;
   }
 
   async hotquery(dto: HotqueryDTO): Promise<HotqueryResponseDTO[]> {
     const { name } = gatewayConfig.hotquery;
-    const { esResult } = await this.gatewayModel.hotquery(dto);
+    const { searchResponse } = await this.gatewayModel.hotquery(dto);
 
-    if (esResult.body.hits.hits.length === 0) {
+    if (searchResponse.body.hits.hits.length === 0) {
       return await this.handleZeroResult(name, dto.label);
     }
-    const result = JSON.parse(esResult.body.hits.hits[0]._source.hotqueryJSON);
+    const result = JSON.parse(
+      searchResponse.body.hits.hits[0]._source.hotqueryJSON,
+    );
 
     return result;
   }
 
   async recommend(dto: RecommendDTO): Promise<string[]> {
     const { name } = gatewayConfig.recommend;
-    const { esResult } = await this.gatewayModel.recommend(dto);
+    const { searchResponse } = await this.gatewayModel.recommend(dto);
 
-    if (esResult.body.hits.hits.length === 0) {
+    if (searchResponse.body.hits.hits.length === 0) {
       return await this.handleZeroResult(name, dto.label);
     }
 
-    const recommend = esResult.body.hits.hits[0]._source.recommend;
+    const recommend = searchResponse.body.hits.hits[0]._source.recommend;
 
     const result: string[] = recommend
       .map((e: string) => e.trim())
@@ -77,13 +81,13 @@ export class GatewayService {
 
   async related(dto: RelatedDTO): Promise<string[]> {
     const { name } = gatewayConfig.related;
-    const { esResult } = await this.gatewayModel.related(dto);
+    const { searchResponse } = await this.gatewayModel.related(dto);
 
-    if (esResult.body.hits.hits.length === 0) {
+    if (searchResponse.body.hits.hits.length === 0) {
       return await this.handleZeroResult(name, dto.label);
     }
 
-    const related = esResult.body.hits.hits[0]._source.related;
+    const related = searchResponse.body.hits.hits[0]._source.related;
 
     const result: string[] = related
       .map((e: string) => e.trim())
@@ -94,12 +98,12 @@ export class GatewayService {
 
   async theme(dto: ThemeDTO): Promise<string | []> {
     const { name } = gatewayConfig.theme;
-    const { esResult } = await this.gatewayModel.theme(dto);
+    const { searchResponse } = await this.gatewayModel.theme(dto);
 
-    if (esResult.body.hits.hits.length === 0) {
+    if (searchResponse.body.hits.hits.length === 0) {
       return await this.handleZeroResult(name, dto.label);
     }
-    const item = esResult.body.hits.hits[0]._source;
+    const item = searchResponse.body.hits.hits[0]._source;
 
     const images: { [key: string]: string } = {};
     let no = 1;
@@ -117,14 +121,14 @@ export class GatewayService {
   async autocomplete(dto: AutocompleteDTO): Promise<AutocompleteResponseDTO[]> {
     const { name } = gatewayConfig.autocomplete;
     const autocompleteArr: AutocompleteResponseDTO[] = [];
-    const { esResult, meta } = await this.gatewayModel.autocomplete(dto);
+    const { searchResponse, meta } = await this.gatewayModel.autocomplete(dto);
 
     const keywordFields = meta.keywordFields;
-    if (esResult.body.hits.hits.length === 0) {
+    if (searchResponse.body.hits.hits.length === 0) {
       return await this.handleZeroResult(name, dto.label);
     }
 
-    esResult.body.hits.hits.forEach((hit: any) => {
+    searchResponse.body.hits.hits.forEach((hit: any) => {
       const item = {
         keyword: hit._source.keyword,
         highlight: hit._source.keyword,
@@ -172,7 +176,7 @@ export class GatewayService {
 
   private async handleZeroResult(name: string, label: string): Promise<[]> {
     const labelResp = await this.gatewayModel.labelCheck(name, label);
-    if (labelResp.esResult.body.hits.hits.length === 0) {
+    if (labelResp.searchResponse.body.hits.hits.length === 0) {
       throw new BadRequestException('해당 label이 존재하지 않습니다.');
     }
     return [];

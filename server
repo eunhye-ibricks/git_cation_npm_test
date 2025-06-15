@@ -3,7 +3,6 @@
 # set directory
 SCRIPT=$0
 APP_ROOT=$(dirname "$SCRIPT")
-APP_ROOT=$(cd "$APP_ROOT/.."; pwd)
 # echo $APP_ROOT
 
 # set pm2
@@ -11,7 +10,7 @@ PM2=$APP_ROOT/node_modules/pm2/bin/pm2
 PM2_HOME=$APP_ROOT/.pm2
 export PM2_HOME
 
-PM2_CONFIG=$APP_ROOT/bin/ecosystem.config.json
+PM2_CONFIG=$APP_ROOT/ecosystem.config.json
 
 # command
 case $1 in

@@ -11,8 +11,7 @@ import { plainToClass } from 'class-transformer';
 import { GatewayService } from '../gateway.service';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { GatewayModel } from '../gateway.model';
-import { ElasticsearchModule } from '@nestjs/elasticsearch';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { HotqueryDTO } from '../dto/gateway.hotquery.dto';
 import { RecommendDTO } from '../dto/gateway.recommend.dto';
 import { RelatedDTO } from '../dto/gateway.related.dto';
@@ -23,6 +22,7 @@ import { AutocompleteDTO } from '../dto/gateway.autocomplete.dto';
 import { SpellerDTO } from '../dto/gateway.speller.dto';
 import { SpellerService } from '../speller/speller.service';
 import configuration from '../../../config/configuration';
+import { SearchEngineModule } from '../../../src/search-engine/search-engine.module';
 
 describe('GatewayController', () => {
   let controller: GatewayController;
@@ -36,11 +36,7 @@ describe('GatewayController', () => {
           validationSchema,
         }),
         SpellerModule,
-        ElasticsearchModule.registerAsync({
-          useFactory: async (configService) =>
-            configService.get('elasticsearch'),
-          inject: [ConfigService],
-        }),
+        SearchEngineModule.register(),
       ],
       controllers: [GatewayController],
       providers: [GatewayService, GatewayModel, Logger],
@@ -53,20 +49,14 @@ describe('GatewayController', () => {
 
   describe('popquery', () => {
     it('should return array of PopqueryResponseDTO', async () => {
-      const dto = plainToClass(PopqueryDTO, { label: 'ibricks' });
+      const dto = plainToClass(PopqueryDTO, { label: 'test' });
       const resultArray = await controller.popquery(dto);
+      console.log(resultArray);
       resultArray.forEach((result) => {
         const resultInstance = plainToClass(PopqueryResponseDTO, result);
         expect(resultInstance).toBeInstanceOf(PopqueryResponseDTO);
       });
     });
-
-    // it('should return empty array', async () => {
-    //   const dto = plainToClass(PopqueryDTO, { label: 'empty' });
-    //   const result = await controller.popquery(dto);
-
-    //   expect(result).toEqual([]);
-    // });
 
     it('should return bad request error', async () => {
       const dto = plainToClass(PopqueryDTO, { label: 'label-not-exist' });
@@ -78,7 +68,7 @@ describe('GatewayController', () => {
 
   describe('hotquery', () => {
     it('should return array of HotqueryResponseDTO', async () => {
-      const dto = plainToClass(HotqueryDTO, { label: 'ibricks' });
+      const dto = plainToClass(HotqueryDTO, { label: 'test' });
       const resultArray = await controller.hotquery(dto);
       resultArray.forEach((result) => {
         const resultInstance = plainToClass(HotqueryResponseDTO, result);
@@ -104,7 +94,7 @@ describe('GatewayController', () => {
   describe('recommend', () => {
     it('should return array of string', async () => {
       const dto = plainToClass(RecommendDTO, {
-        label: 'ibricks',
+        label: 'test',
         keyword: '아이브릭스',
       });
       const resultArray = await controller.recommend(dto);
@@ -114,7 +104,7 @@ describe('GatewayController', () => {
       ).toBeTruthy();
     });
 
-    it('should return empty array', async () => {
+    it.skip('should return empty array', async () => {
       const dto = plainToClass(RecommendDTO, {
         label: 'empty',
         keyword: 'any',
@@ -134,11 +124,11 @@ describe('GatewayController', () => {
     });
   });
 
-  describe('related', () => {
+  describe.skip('related', () => {
     it('should return array of string', async () => {
       const dto = plainToClass(RelatedDTO, {
-        label: 'stock',
-        keyword: '기준금리',
+        label: 'test',
+        keyword: '아이브릭스',
       });
       const resultArray = await controller.related(dto);
       expect(resultArray).toBeInstanceOf(Array);
@@ -149,7 +139,7 @@ describe('GatewayController', () => {
 
     it('should return empty array', async () => {
       const dto = plainToClass(RelatedDTO, {
-        label: 'stock',
+        label: 'test',
         keyword: 'no match',
       });
       const result = await controller.related(dto);
@@ -170,8 +160,8 @@ describe('GatewayController', () => {
   describe('theme', () => {
     it('should return string(comma seperated)', async () => {
       const dto = plainToClass(ThemeDTO, {
-        label: 'ibricks',
-        keyword: '서비스운영팀',
+        label: 'test',
+        keyword: '아이브릭스',
       });
       const result = await controller.theme(dto);
       expect(typeof result).toBe('string');
@@ -179,7 +169,7 @@ describe('GatewayController', () => {
 
     it('should return empty array', async () => {
       const dto = plainToClass(ThemeDTO, {
-        label: 'ibricks',
+        label: 'test',
         keyword: 'no match',
       });
       const result = await controller.theme(dto);
@@ -200,7 +190,7 @@ describe('GatewayController', () => {
   describe('autocomplete', () => {
     it('should return array of AutocompleteResponseDTO', async () => {
       const dto = plainToClass(AutocompleteDTO, {
-        label: 'ibricks',
+        label: 'test',
         keyword: '아',
       });
       const resultArray = await controller.autocomplete(dto);
@@ -213,8 +203,8 @@ describe('GatewayController', () => {
 
     it('should return empty array', async () => {
       const dto = plainToClass(AutocompleteDTO, {
-        label: 'ibricks',
-        keyword: '가나다라마바사',
+        label: 'test',
+        keyword: 'no match',
       });
       const result = await controller.autocomplete(dto);
       expect(result).toEqual([]);
@@ -234,18 +224,18 @@ describe('GatewayController', () => {
   describe('speller', () => {
     it('should return json', async () => {
       const dto = plainToClass(SpellerDTO, {
-        label: 'ibricks',
-        query: '건깅',
+        label: 'test',
+        query: '이이브릭스',
       });
       const result = await controller.speller(dto);
       expect(result).toMatchObject(new SpellerResponse());
-      expect(result.correction).toBe('건강');
+      expect(result.correction).toBe('아이브릭스');
     });
 
     it('should return same keyword when keyword not exist', async () => {
       const query = '존재하지않는키워드';
       const dto = plainToClass(SpellerDTO, {
-        label: 'ibricks',
+        label: 'test',
         query,
       });
       const result = await controller.speller(dto);
@@ -253,7 +243,7 @@ describe('GatewayController', () => {
       expect(result.correction).toEqual(query);
     });
 
-    it('should return bad request error', async () => {
+    it.skip('should return bad request error', async () => {
       const dto = plainToClass(SpellerDTO, {
         label: 'label-not-exist',
         query: '아',

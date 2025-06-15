@@ -1,4 +1,3 @@
-import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import {
   ExceptionFilter,
   Catch,
@@ -8,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { WinstonLoggerService } from '../logger/winston.service';
+import { isSearchClientError } from 'src/search-engine/search-engine.errors';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -36,9 +36,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       responseBody.statusCode = exception.getStatus();
       responseBody.message = exception.message;
-    } else if (exception instanceof ElasticsearchClientError) {
+    } else if (isSearchClientError(exception)) {
       responseBody.statusCode = HttpStatus.BAD_GATEWAY;
-      responseBody.message = `${exception.name}: ${exception.message}`;
+      responseBody.message = `[SearchEngine] ${exception.name}: ${exception.message}`;
     } else {
       responseBody.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
       responseBody.message = 'Internal Service Error';
