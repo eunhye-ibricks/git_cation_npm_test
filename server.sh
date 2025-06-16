@@ -1,16 +1,29 @@
 #!/bin/sh
 set -e
+
 # set directory
 SCRIPT=$0
 APP_ROOT=$(cd "$(dirname "$0")"; pwd)
 echo $APP_ROOT
 cd "$APP_ROOT"
 
-# set pm2
+# check node version
+check_node_version() {
+  REQUIRED_VERSION=$(cat "$APP_ROOT/.nvmrc" | sed 's/^v//')
+  CURRENT_VERSION=$(node -v | sed 's/^v//')
+
+  if [ "$CURRENT_VERSION" != "$REQUIRED_VERSION" ]; then
+    echo "❌ Required Node.js version: $REQUIRED_VERSION (current: v$CURRENT_VERSION)"
+    exit 1
+  fi
+
+  echo "✅ Node.js version matches: v$CURRENT_VERSION"
+}
+check_node_version
+
 PM2=$APP_ROOT/node_modules/pm2/bin/pm2
 PM2_HOME=$APP_ROOT/.pm2
-export PM2_HOME
-
+export PM2_HOME=$APP_ROOT/.pm2
 PM2_CONFIG=$APP_ROOT/ecosystem.config.json
 
 # command
@@ -21,31 +34,32 @@ start)
     exit 100
   fi
 
-case "$2" in
-  test)
-    export NODE_ENV=test
-    ;;
-  dev)
-    export NODE_ENV=development
-    ;;
-  prod)
-    export NODE_ENV=production
-    ;;
-  *)
-    echo 'Invalid environment. Use "test" or "dev" or "prod".'
-    exit 101
-    ;;
-esac
+  case "$2" in
+    test)
+      export NODE_ENV=test
+      ;;
+    dev)
+      export NODE_ENV=development
+      ;;
+    prod)
+      export NODE_ENV=production
+      ;;
+    *)
+      echo 'Invalid environment. Use "test" or "dev" or "prod".'
+      exit 101
+      ;;
+  esac
+
   echo "building application ..."
-  npm run build
+  nest build
 
   echo "start server ... $NODE_ENV"
   "$PM2" start "$PM2_CONFIG" --env $NODE_ENV
   ;;
 restart)
   echo "building application ..."
-  npm run build
-  
+  nest build
+
   echo 'restart server ...'
   "$PM2" restart "$PM2_CONFIG"
   ;;
@@ -77,13 +91,13 @@ list)
   echo ' usage: '$0' [command]'
   echo ''
   echo ' command:'
-  echo '   start dev | prod    start a server'
-  echo '   restart             restart a server'
-  echo '   stop                stop a server'
-  echo '   delete              remove a server'
-  echo '   info                describe all parameters'
-  echo '   logs                stream log file'
-  echo '   list                list all servers'
+  echo '   start test | dev | prod    start a server'
+  echo '   restart                    restart a server'
+  echo '   stop                       stop a server'
+  echo '   delete                     remove a server'
+  echo '   info                       describe all parameters'
+  echo '   logs                       stream log file'
+  echo '   list                       list all servers'
   echo ''
   ;;
 esac
