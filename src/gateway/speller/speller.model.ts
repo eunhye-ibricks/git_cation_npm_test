@@ -42,6 +42,7 @@ export class SpellerModel {
           },
         },
       ],
+      track_total_hits: true,
     };
     const searchResponse = await this.searchEngine.search({ index, body });
 

@@ -191,7 +191,7 @@ export class SpellerService implements OnModuleInit {
 
         if (count === 0) break;
 
-        this.insert(searchResponse, label, newinstance);
+        this.insert(scrollResult, label, newinstance);
       }
       this.done(label, newinstance);
     } catch (err) {
