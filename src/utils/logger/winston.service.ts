@@ -23,7 +23,17 @@ export class WinstonLoggerService implements LoggerService {
       winston.format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
       winston.format.errors({ stack: true }),
       winston.format.printf((info) => {
-        const { level, message, timestamp, stack } = info;
+        const { level, timestamp, stack } = info;
+
+        // message가 object이면 stringify
+        let message = info.message;
+        if (typeof message === 'object') {
+          try {
+            message = JSON.stringify(message, null, 2);
+          } catch {
+            message = '[Unserializable Object]';
+          }
+        }
 
         const log = `${timestamp} [${level}][${
           process.env.INSTANCE_ID ? process.env.INSTANCE_ID : 0
@@ -66,7 +76,7 @@ export class WinstonLoggerService implements LoggerService {
   }
 
   log(message: any) {
-    this.logger.log(message);
+    this.logger.log({ level: 'info', message });
   }
   error(message: any) {
     if (message instanceof Error) {
@@ -77,13 +87,13 @@ export class WinstonLoggerService implements LoggerService {
   }
 
   warn(message: any) {
-    this.logger.warn(message);
+    this.logger.log({ level: 'warn', message });
   }
   debug(message: any) {
-    this.logger.debug(message);
+    this.logger.log({ level: 'debug', message });
   }
   verbose(message: any) {
-    this.logger.verbose(message);
+    this.logger.log({ level: 'verbose', message });
   }
   // fatal?(message: any, ...optionalParams: any[]) {
   //   throw new Error('Method not implemented.');
