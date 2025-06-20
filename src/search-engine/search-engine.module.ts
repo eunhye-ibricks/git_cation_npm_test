@@ -19,7 +19,7 @@ export class SearchEngineModule {
       exports: ['SearchEngine'],
     };
 
-    const configService = new ConfigService(); // 임시로 직접 생성
+    const configService = new ConfigService();
 
     const type = configService.get<'elasticsearch' | 'opensearch'>(
       'SEARCH_ENGINE',

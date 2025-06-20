@@ -5,6 +5,7 @@ import { ResponseCommonDTO } from './dto/response.common.dto';
 import { WinstonLoggerService } from '../utils/logger/winston.service';
 import { SimpleSearchDTO } from './dto/simple-search.dto';
 // import { Search_Response } from '@opensearch-project/opensearch/api';
+
 @Injectable()
 export class SearchService {
   constructor(

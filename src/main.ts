@@ -36,7 +36,7 @@ async function bootstrap() {
   logger.log(
     '*************************** Config ***************************\n',
   );
-  logger.log(`ENV: ${env}`);
+  logger.log(`NODE_ENV: ${env}`);
   logger.log(`App Port: ${port}`);
   logger.log(`Search Engine: ${searchEngine}`);
   logger.log(`Nodes: ${nodes}\n`);
@@ -53,7 +53,6 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   // app.enableShutdownHooks();
-
   await app.listen(port);
 }
 bootstrap();
