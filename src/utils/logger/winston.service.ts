@@ -6,6 +6,7 @@ import * as winston from 'winston';
 import { WinstonModule } from 'nest-winston';
 import WinstonDaily from 'winston-daily-rotate-file';
 import * as Transport from 'winston-transport';
+import { getCorrelationId } from '../interceptor/correlation-id.store';
 
 export class WinstonLoggerService implements LoggerService {
   private readonly logger: winston.Logger;
@@ -34,10 +35,12 @@ export class WinstonLoggerService implements LoggerService {
             message = '[Unserializable Object]';
           }
         }
-
+        const correlationId = getCorrelationId() ?? 'N/A';
         const log = `${timestamp} [${level}][${
           process.env.INSTANCE_ID ? process.env.INSTANCE_ID : 0
-        }] ${''}: ${message ? message : ''}${stack ? `${stack}` : ''}`;
+        }] [${correlationId}]${''}: ${message ? message : ''}${
+          stack ? `${stack}` : ''
+        }`;
 
         return log;
       }),

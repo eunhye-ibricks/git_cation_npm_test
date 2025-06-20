@@ -1,3 +1,5 @@
+// @unused
+// 현재는 사용하지 않음
 import { Inject, Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { WinstonLoggerService } from '../logger/winston.service';
