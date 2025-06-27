@@ -1,0 +1,5 @@
+.pm2
+.vscode
+logs
+.git
+.gitignore
