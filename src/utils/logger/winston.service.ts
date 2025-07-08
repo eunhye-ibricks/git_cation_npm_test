@@ -19,7 +19,7 @@ export class WinstonLoggerService implements LoggerService {
     };
 
     const level = loggerConfig.debug ? 'debug' : 'info';
-
+    const logPath = process.env['LOG_PATH'] || './logs';
     const format = winston.format.combine(
       winston.format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
       winston.format.errors({ stack: true }),
@@ -49,7 +49,7 @@ export class WinstonLoggerService implements LoggerService {
     const transports: Transport[] = [
       new WinstonDaily({
         datePattern: 'YYYY-MM-DD',
-        dirname: `${loggerConfig.path}`,
+        dirname: `${logPath}`,
         filename: '%DATE%.log',
         maxFiles: loggerConfig.log.maxFiles || 30,
         maxSize: loggerConfig.log.maxSize || '100m',

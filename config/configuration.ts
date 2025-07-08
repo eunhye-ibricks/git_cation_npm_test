@@ -22,7 +22,6 @@ export default () => ({
   logger: {
     debug: false, // debug 로그 활성화
     console: true, // console.log 출력 여부(운영 시 false)
-    path: process.env.LOG_PATH || './logs',
     log: {
       maxFiles: 30,
       maxSize: '100m',
