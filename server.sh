@@ -51,14 +51,14 @@ start)
   esac
 
   echo "building application ..."
-  nest build
+  npx nest build
 
   echo "start server ... $NODE_ENV"
   "$PM2" start "$PM2_CONFIG" --env $NODE_ENV
   ;;
 restart)
   echo "building application ..."
-  nest build
+  npx nest build
 
   echo 'restart server ...'
   "$PM2" restart "$PM2_CONFIG"
