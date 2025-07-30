@@ -1,0 +1,15 @@
+{
+  "search-engine": {
+    "maxRetries": 3,
+    "requestTimeout": 30000,
+    "pingTimeout": 3000
+  },
+  "logger": {
+    "debug": false,
+    "console": true,
+    "log": {
+      "maxFiles": 30,
+      "maxSize": "100m"
+    }
+  }
+}

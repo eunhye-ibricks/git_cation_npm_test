@@ -1,30 +1,58 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
+const configPath = path.resolve(process.cwd(), 'config/config.json');
+let fileConfig: any = {};
+
+try {
+  const raw = fs.readFileSync(configPath, 'utf-8');
+  fileConfig = JSON.parse(raw);
+} catch (err) {
+  console.warn(
+    '⚠️ config.json 파일을 읽을 수 없습니다. 환경 변수만 사용됩니다.',
+  );
+}
+
+// 기본값
+const defaultSearchEngineConfig = {
+  maxRetries: 3,
+  requestTimeout: 30000,
+  pingTimeout: 3000,
+};
+
+const defaultLoggerConfig = {
+  debug: false,
+  console: true,
+  log: {
+    maxFiles: 30,
+    maxSize: '100m',
+  },
+};
+
 export default () => ({
   search_engine: process.env.SEARCH_ENGINE,
+
   elasticsearch: {
     node: (process.env.NODES || 'http://localhost:9200').split(','),
-    maxRetries: 3,
-    requestTimeout: 30000,
-    pingTimeout: 3000,
+    ...defaultSearchEngineConfig,
+    ...(fileConfig['search-engine'] || {}),
   },
+
   opensearch: {
     node: (process.env.NODES || 'http://localhost:9200').split(','),
     ssl: {
-      rejectUnauthorized: false, // TLS 인증서 검증 비활성화
+      rejectUnauthorized: false,
     },
     auth: {
       username: process.env.USERNAME,
       password: process.env.PASSWORD,
     },
-    maxRetries: 3,
-    requestTimeout: 30000,
-    pingTimeout: 3000,
+    ...defaultSearchEngineConfig,
+    ...(fileConfig['search-engine'] || {}),
   },
+
   logger: {
-    debug: false, // debug 로그 활성화
-    console: true, // console.log 출력 여부(운영 시 false)
-    log: {
-      maxFiles: 30,
-      maxSize: '100m',
-    },
+    ...defaultLoggerConfig,
+    ...(fileConfig.logger || {}),
   },
 });
