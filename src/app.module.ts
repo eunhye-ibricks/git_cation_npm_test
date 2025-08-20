@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Logger } from '@nestjs/common';
@@ -10,8 +10,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import configuration from 'config/configuration';
 import { SampleModule } from './sample/sample.module';
 import { SearchEngineModule } from './search-engine/search-engine.module';
-import { CorrelationIdLoggerInterceptor } from './utils/interceptor/correlation-id-logger.interceptor';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { CorrelationIdMiddleware } from './utils/middleware/correlationid.logger.middleware';
 
 @Module({
   imports: [
@@ -28,13 +27,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     SampleModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    Logger,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CorrelationIdLoggerInterceptor,
-    },
-  ],
+  providers: [AppService, Logger],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+  }
+}

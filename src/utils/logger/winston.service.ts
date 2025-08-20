@@ -6,7 +6,7 @@ import * as winston from 'winston';
 import { WinstonModule } from 'nest-winston';
 import WinstonDaily from 'winston-daily-rotate-file';
 import * as Transport from 'winston-transport';
-import { getCorrelationId } from '../interceptor/correlation-id.store';
+import { getCorrelationId } from '../middleware/correlation-id.store';
 
 export class WinstonLoggerService implements LoggerService {
   private readonly logger: winston.Logger;
