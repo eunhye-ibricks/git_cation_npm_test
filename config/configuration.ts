@@ -33,19 +33,23 @@ export default () => ({
   search_engine: process.env.SEARCH_ENGINE,
 
   elasticsearch: {
-    node: (process.env.NODES || 'http://localhost:9200').split(','),
+    node: (process.env.SEARCH_ENGINE_NODES || 'http://localhost:9200').split(
+      ',',
+    ),
     ...defaultSearchEngineConfig,
     ...(fileConfig['search-engine'] || {}),
   },
 
   opensearch: {
-    node: (process.env.NODES || 'http://localhost:9200').split(','),
+    node: (process.env.SEARCH_ENGINE_NODES || 'http://localhost:9200').split(
+      ',',
+    ),
     ssl: {
       rejectUnauthorized: false,
     },
     auth: {
-      username: process.env.USERNAME,
-      password: process.env.PASSWORD,
+      username: process.env.SEARCH_ENGINE_USERNAME,
+      password: process.env.SEARCH_ENGINE_PASSWORD,
     },
     ...defaultSearchEngineConfig,
     ...(fileConfig['search-engine'] || {}),
