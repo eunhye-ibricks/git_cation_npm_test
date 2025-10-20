@@ -53,7 +53,7 @@ export class WinstonLoggerService implements LoggerService {
         filename: '%DATE%.log',
         maxFiles: loggerConfig.log.maxFiles || 30,
         maxSize: loggerConfig.log.maxSize || '100m',
-        zippedArchive: true,
+        zippedArchive: false,
       }),
     ];
 
