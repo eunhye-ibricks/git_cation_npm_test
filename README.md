@@ -1,37 +1,91 @@
 # 실행 환경
 
-Node.js 버전: v16.20.2(.nvmrc 파일 확인)
-
-# VS Code 설정
-
-- EsLint, Prettier 플러그인 설치
-- Workspace setting 설정
-  - "Default Formatter" -> "prettier"
-  - "Format on save" 체크
-
 # 목차
 
-[1. 실행](#1-실행)
+[1. 설정](#1-설정)
 
-[2. 디렉터리 구조](#2-디렉터리-구조)
+[2. 실행](#2-실행)
 
-[3. 설정](#3-설정)
+[3. 디렉터리 구조](#3-디렉터리-구조)
 
-[4. 디버깅](#4-디버깅)
+[4. 요청 및 응답 처리 과정](#4-요청-및-응답-처리-과정)
 
-[5. 요청 및 응답 처리 과정](#5-요청-및-응답-처리-과정)
+[5. 에러 처리](#5-에러-처리)
 
-[6. 에러 처리](#6-에러-처리)
+[6. 로깅](#6-로깅)
 
-[7. 로깅](#7-로깅)
+[7. Swagger](#7-swagger)
 
-[8. Swagger](#8-swagger)
+[8. gateway](#8-gateway)
 
-[9. gateway](#9-gateway)
+[9. 디버깅](#9-디버깅)
 
-# 1. 실행
+# 1. 설정
 
-## 1. 전역 PM2 로 실행
+Node.js 버전: v16.20.2(.nvmrc 파일 확인)
+
+## VS Code 설정
+
+1. EsLint, Prettier 플러그인 설치
+
+2. Workspace setting 설정
+
+- "Default Formatter" -> "prettier"
+- "Format on save" 체크
+
+## 환경변수 설정
+
+config/env 경로의 .sample.env 파일을 참고하여 환경변수 파일 생성
+
+- 환경변수는 아래 3가지 이름으로 설정 가능
+- NODE_ENV 값에 따라 아래 환경변수 중 하나를 자동으로 확인
+
+```jsx
+.test.env         // NODE_ENV = test
+.development.env  // NODE_ENV = development
+.production.env   // NODE_ENV = production
+```
+
+기타 logger 및 검색엔진 설정은 config.json 파일에서
+
+```jsx
+// config/config.json
+{
+  "search-engine": {
+    "maxRetries": 3,
+    "requestTimeout": 30000,
+    "pingTimeout": 3000
+  },
+  "logger": {
+    "debug": false,
+    "console": true,
+    "log": {
+      "maxFiles": 30,
+      "maxSize": "100m"
+    }
+  }
+}
+```
+
+# 2. 실행
+
+실행은 모듈 내부 pm2 또는 전역 pm2 로 실행
+
+## 2-1. 실행 방법 1: 모듈 내부 PM2
+
+실행 스크립트를 통해 실행
+
+```jsx
+./server start dev    // NODE_ENV = development
+./server start prod   // NODE_ENV = production
+
+./server list         // 실행 확인
+./server log          // 로그 확인
+```
+
+## 2-2. 실행 방법 2: 전역 PM2
+
+pm2가 설치되어 있다면
 
 ```jsx
 npm run start:dev   // NODE_ENV = development
@@ -50,57 +104,12 @@ npm run start:prod  // NODE_ENV = production
   },
 ```
 
-pm2 설정파일(ecosystem.config.cjs)를 통해 NODE_ENV 환경변수를 설정
-
-```js
-// bin/ecosystem.config.cjs
-{
-  "apps": [
-    {
-      "name": "api-template",
-      "script": "dist/src/main.js",
-      "cwd": "../",
-      "instance_var": "INSTANCE_ID",
-      "ignore_watch": ["node_modules", "logs", ".pm2"],
-      "exec_mode": "cluster",
-      "instances": 2,
-      "restart_delay": 2000,
-      "env_development": {
-        "NODE_ENV": "development",
-        "watch": false
-      },
-      "env_production": {
-        "NODE_ENV": "production",
-        "watch": false
-      }
-    }
-  ]
-}
-
-```
-
-## 2. 모듈 내부 PM2 로 실행
-
-서버 네트워크 등의 문제로 전역 pm2 설치가 어려운 경우 사용
-
-```js
-cd bin
-./server start dev    // NODE_ENV = development
-./server start prod   // NODE_ENV = production
-
-./server list         // 실행 확인
-./server log          // 로그 확인
-```
-
-기타 자세한 내용은 bin/server 파일 확인
-
-# 2. 디렉터리 구조
+# 3. 디렉터리 구조
 
 ```jsx
 
-├─bin
-│  ├─ ecosystem.config.json   // PM2 설정파일
-│  └─ server                  // 실행 스크립트 (내장 PM2 사용)
+├─ecosystem.config.json      // PM2 설정파일
+├─server.sh                  // 실행 스크립트 (내장 PM2 사용)
 │
 ├─src                         // 소스파일 (모듈 단위)
 │  │
@@ -114,7 +123,7 @@ cd bin
 │  │  ├─ search.service.ts     // 모델에서 전달받은 데이터 가공 / 응답 생성
 │  │  └─ search.module.ts      // search 모듈 정의(Nestjs)
 │  │
-│  └─gateway                  // 게이트웨이 모듈
+│  └─gateway                  // 게이트웨이 모듈(자동완성, 오타교정, 인기검색어 등...)
 │  │
 │  └─utils                    // 기타 유틸리티(logger, exception filter, swagger 등..)
 │  └─...                      // 기타 모듈...
@@ -138,51 +147,7 @@ cd bin
 
 ```
 
-# 3. 설정
-
-환경변수와 config/configuration.ts 파일로 설정
-
-```js
-/**
- * config/env/.development.env
- * 사용 포트, 엘라스틱서치 URL, 로그 경로 설정
- **/
-APP_PORT=14050
-ELASTICSEARCH_NODES=http://192.168.0.4:9203,http://192.168.0.5:9203,http://192.168.0.11:9203
-LOG_PATH=./logs
-
-/**
- *
- * config/configuration.ts
- * 애플리케이션 전체 설정
-**/
-export default () => ({
-  elasticsearch: {
-    node: (process.env.ELASTICSEARCH_NODES || 'http://localhost:9200').split(
-      ',',
-    ),
-    maxRetries: 3,
-    requestTimeout: 30000,
-    pingTimeout: 3000,
-    sniffOnStart: true,
-  },
-  logger: {
-    debug: false,                           // debug 로그 출력 여부
-    console: true,                          // console.log 출력 여부(PM2 로그)
-    path: process.env.LOG_PATH || './logs', // 로그 파일 경로
-    log: {
-      maxFiles: 30,                         // 최대 로그 파일 개수
-      maxSize: '100m',                      // 최대 파일 크기
-    },
-  },
-});
-
-
-```
-
-- NODE_ENV 에 따라 env 경로의 환경변수 파일을 자동으로 선택하여 사용
-
-위의 설정값을 통해 Nestjs 의 ConfigModule 을 생성하고 코드에선 ConfigModule을 이용하여 설정값 사용
+환경변수를 이용해서 Nestjs 의 ConfigModule 을 생성하고 코드에선 ConfigModule을 이용하여 설정값 사용
 
 ```js
 
@@ -203,44 +168,7 @@ export default () => ({
 })
 ```
 
-# 4. 디버깅
-
-vs code debugger 설정파일(.vscode/launch.json)
-
-```js
-{
-  // IntelliSense를 사용하여 가능한 특성에 대해 알아보세요.
-  // 기존 특성에 대한 설명을 보려면 가리킵니다.
-  // 자세한 내용을 보려면 https://go.microsoft.com/fwlink/?linkid=830387을(를) 방문하세요.
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "main.js",
-      "program": "${workspaceFolder}/dist/src/main.js",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "outputCapture": "std",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["nodemon"],
-      "restart": true,
-      "skipFiles": ["<node_internals>/**"],
-      "preLaunchTask": "npm: build",
-      "env": {
-        "NODE_ENV": "test"
-      }
-    }
-  ]
-}
-
-```
-
-- vs code 좌측 메뉴 => "run and debug" 메뉴에서 상단에 main.js 선택하고 실행 버튼 클릭
-- NODE_ENV 는 "test"로 설정하여 config/env/.test.env 설정파일을 읽어서 실행됨
-
-# 5. 요청 및 응답 처리 과정
+# 4. 요청 및 응답 처리 과정
 
 각 파일 별 역할은 다음과 같음
 
@@ -271,7 +199,7 @@ vs code debugger 설정파일(.vscode/launch.json)
 5) controller     -> 요청에 대한 응답
 ```
 
-# 6. 에러 처리
+# 5. 에러 처리
 
 - API 요청 처리 중 발생하는 에러는 별도로 처리하지 않으면 전역 예외 필터(Exception filter) 에서 처리
 - 예외 필터 에서 에러 로깅 및 에러 응답 생성하여 전달.
@@ -331,29 +259,29 @@ try {
 // ...
 ```
 
-# 7. 로깅
+# 6. 로깅
 
-- winston, morgan 사용(경로 : /lib/logger/logger.js, morgan.js)
-- 로그 레벨은 log, warn, error, verbose, debug 가 있음
-  - 특별한 경우가 아니면 log, error, debug 만 사용
-- console 설정을 false 로 하는 경우 pm2 log를 출력하지 않음
-  - pm2 log 는 로그 삭제 대상이 아니기 때문에 운영 환경에서는 false 설정
+winston 사용하여 로그 관리
+로그 레벨은 log, warn, error, debug 가 있음
+
+- 특별한 경우가 아니면 log, error, debug 만 사용
+  console 설정을 false 로 하는 경우 pm2 log를 출력하지 않음
+- pm2 log 는 로그 관리(삭제) 대상이 아니기 때문에 운영 환경에서는 false 설정
 
 ```jsx
 
-// /config/configuration.ts
-export default () => ({
- ...
-  logger: {
-    debug: false,                           // debug 로그 출력 여부
-    console: true,                          // console 로그 파일 출력 여부
-    path: process.env.LOG_PATH || './logs', // 로그 경로
-    log: {
-      maxFiles: 30,                         // 최대 로그 파일 개수
-      maxSize: '100m',                      // 파일당 최대 크기
-    },
-  },
-});
+// config/config.json
+{
+   //...
+  "logger": {
+    "debug": false,      // debug 로그 출력 여부
+    "console": true,     // console 로그 파일 출력 여부
+    "log": {
+      "maxFiles": 30,    // 최대 로그 파일 개수
+      "maxSize": "100m"  // 파일당 최대 크기
+    }
+  }
+}
 
 ```
 
@@ -381,7 +309,7 @@ export class SearchService {
   }
 ```
 
-# 8. Swagger
+# 7. Swagger
 
 controller 및 DTO 클래스에서 사용하는 데코레이터(@) 를 통해 자동으로 생성됨
 
@@ -443,7 +371,7 @@ export class SimpleSearchDTO {
 ...
 ```
 
-# 9. gateway
+# 8. gateway
 
 기존 Openquery Gateway의 동일한 기능과 인터페이스로 Openquery gateway 대신 사용
 
@@ -482,3 +410,40 @@ export class GatewayController {
 
   // ...
 ```
+
+# 9. 디버깅
+
+vs code debugger 설정파일(.vscode/launch.json)
+
+```js
+{
+  // IntelliSense를 사용하여 가능한 특성에 대해 알아보세요.
+  // 기존 특성에 대한 설명을 보려면 가리킵니다.
+  // 자세한 내용을 보려면 https://go.microsoft.com/fwlink/?linkid=830387을(를) 방문하세요.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "main.js",
+      "program": "${workspaceFolder}/dist/src/main.js",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "outputCapture": "std",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["nodemon"],
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "preLaunchTask": "npm: build",
+      "env": {
+        "NODE_ENV": "test"
+      }
+    }
+  ]
+}
+
+```
+
+- vs code 좌측 메뉴 => "run and debug" 메뉴에서 상단에 main.js 선택하고 실행 버튼 클릭
+- NODE_ENV 는 "test"로 설정하여 config/env/.test.env 설정파일을 읽어서 실행됨
