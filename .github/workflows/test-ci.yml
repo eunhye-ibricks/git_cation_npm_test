@@ -1,0 +1,24 @@
+name: test
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          echo "내 서버에서 빌드를 시작합니다."
+          npm install
+          npm run build
+
+      - name: Run
+        run: |
+          echo "내 서버에서 앱을 실행합니다."
+          pm2 reload ecosystem.config.json --env development || npm run start:dev

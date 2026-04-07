@@ -1,6 +1,8 @@
 import { Controller, Get, Inject, Logger, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { SimpleSearchDTO } from './dto/simple-search.dto';
+import { ThesisSearchDTO } from './dto/thesis-search.dto';
+import { PolicyNewsSearchDTO } from './dto/policy-news-search.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseCommonDTO } from './dto/response.common.dto';
 import { WinstonLoggerService } from '../utils/logger/winston.service';
@@ -13,15 +15,49 @@ export class SearchController {
     private readonly searchService: SearchService,
   ) {}
 
-  @Get('/simple')
+  @Get('/integrated')
   @ApiResponse({
     status: 200,
     description: 'success',
     type: ResponseCommonDTO,
   })
-  async simpleSearch(
+  async integratedSearch(
     @Query() dto: SimpleSearchDTO,
   ): Promise<ResponseCommonDTO> {
-    return await this.searchService.simpleSearch(dto);
+    return await this.searchService.integratedSearch(dto);
+  }
+
+  @Get('/thesis')
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+    type: ResponseCommonDTO,
+  })
+  async thesisSearch(
+    @Query() dto: ThesisSearchDTO,
+  ): Promise<ResponseCommonDTO> {
+    return await this.searchService.thesisSearch(dto);
+  }
+
+  @Get('/stock')
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+    type: ResponseCommonDTO,
+  })
+  async stockSearch(@Query() dto: SimpleSearchDTO): Promise<ResponseCommonDTO> {
+    return await this.searchService.stockSearch(dto);
+  }
+
+  @Get('/policy-news')
+  @ApiResponse({
+    status: 200,
+    description: 'success',
+    type: ResponseCommonDTO,
+  })
+  async policyNewsSearch(
+    @Query() dto: PolicyNewsSearchDTO,
+  ): Promise<ResponseCommonDTO> {
+    return await this.searchService.policyNewsSearch(dto);
   }
 }

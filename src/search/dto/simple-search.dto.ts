@@ -1,4 +1,11 @@
-import { IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -21,4 +28,14 @@ export class SimpleSearchDTO {
   @IsInt()
   @Min(0)
   readonly from: number = 0;
+
+  @ApiPropertyOptional({ description: '시작일 YYYY-MM-DD' })
+  @IsOptional()
+  @IsString()
+  startDate?: string;
+
+  @ApiPropertyOptional({ description: '종료일 YYYY-MM-DD' })
+  @IsOptional()
+  @IsString()
+  endDate?: string;
 }
