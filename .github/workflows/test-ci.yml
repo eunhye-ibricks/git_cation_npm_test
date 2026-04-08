@@ -33,10 +33,10 @@ jobs:
           
           echo "내 서버에서 앱을 실행합니다."
           # 실패 시 에러를 뱉도록 설정 (npm run start:dev가 실패하면 롤백으로 넘어감)
-          # npm run start:dev
+          npm run start:dev
           # pm2 reload api-template || pm2 start ecosystem.config.json --env development
           # pm2 restart ecosystem.config.json --env development
-          pm2 restart api-template || pm2 start ecosystem.config.json --env development
+          # pm2 restart api-template || pm2 start ecosystem.config.json --env development
 
       - name: Save Success State
         if: success()
@@ -64,6 +64,6 @@ jobs:
           npm install
           npm run build
           
-          pm2 reload ecosystem.config.json --env development || npm run start:dev
+          npm run start:dev
           
           echo "🚨 이전 성공 버전으로 자동 복구되었습니다. 코드를 확인하세요!"
