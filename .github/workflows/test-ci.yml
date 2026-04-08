@@ -29,7 +29,9 @@ jobs:
         run: |
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          nvm use default || nvm use 16.20.2
+          nvm use 16.20.2
+          
+          npm install -g pm2 || echo "pm2 already installed"
           
           echo "내 서버에서 앱을 실행합니다."
           # 실패 시 에러를 뱉도록 설정 (npm run start:dev가 실패하면 롤백으로 넘어감)
@@ -40,7 +42,8 @@ jobs:
         run: |
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          nvm use default || nvm use 16.20.2
+          nvm use 16.20.2
+          npm install -g pm2 || echo "pm2 already installed"
           
           pm2 save
           echo "배포 성공!"
