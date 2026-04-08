@@ -15,21 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # 롤백(git reset)을 위해 이전 이력까지 가져옵니다.
+          fetch-depth: 2
 
       - name: install and build
         run: |
           echo "내 서버에서 빌드를 시작합니다."
           npm install
-          npm build
+          npm run build  # run을 붙여야 실행됩니다.
 
       - name: Run
-	working-directory: /Users/keh/Desktop/appl/api-template-nest
-        id: deploy_step # 롤백 판단을 위해 ID를 꼭 붙여야 합니다.
+        working-directory: /Users/keh/Desktop/appl/api-template-nest
+        id: deploy_step
         run: |
           echo "내 서버에서 앱을 실행합니다."
           npm run start:dev
-
+         
       - name: Save Success State
         if: success()
         run: |
@@ -38,14 +38,10 @@ jobs:
 
       - name: Automatic Rollback
         if: failure() && steps.deploy_step.outcome == 'failure'
+        # 롤백 시에도 해당 디렉토리로 이동해야 합니다.
+        working-directory: /Users/keh/Desktop/appl/api-template-nest
         run: |
           echo "⚠️ 배포 실패 감지! 롤백을 시작합니다."
-
           # git reset --hard HEAD@{1}
-          
-          # 이전 코드로 다시 빌드
-          npm install
-          
           npm run start:dev
-          
-          echo "🚨 이전 성공 버전으로 자동 복구되었습니다. 코드를 확인하세요!"
+          echo "🚨 이전 성공 버전으로 자동 복구되었습니다."
