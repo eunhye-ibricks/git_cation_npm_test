@@ -18,12 +18,13 @@ jobs:
           fetch-depth: 2 # 롤백(git reset)을 위해 이전 이력까지 가져옵니다.
 
       - name: Build
+        working-directory: /Users/keh/Desktop/appl/api-template-nest
         run: |
           echo "내 서버에서 빌드를 시작합니다."
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
           nvm use 16.20.2
-          
+          pwd
           npm install
           npm run build
 
@@ -60,7 +61,7 @@ jobs:
           nvm use 16.20.2
 
           # 코드를 이전 커밋으로 되돌림
-          git reset --hard HEAD@{1}
+          # git reset --hard HEAD@{1}
           
           # 이전 코드로 다시 빌드
           npm install
