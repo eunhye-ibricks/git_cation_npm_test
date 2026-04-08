@@ -9,23 +9,45 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Check Current Directory
+        run: pwd
 
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 2 # 롤백(git reset)을 위해 이전 이력까지 가져옵니다.
-	
+
+      - name: Build
+        working-directory: /Users/keh/Desktop/appl/api-template-nest
+        run: |
+          echo "내 서버에서 빌드를 시작합니다."
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use 16.20.2
+          pwd
+          npm install
+          npm run build
+
       - name: Run
         id: deploy_step # 롤백 판단을 위해 ID를 꼭 붙여야 합니다.
         run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use 16.20.2
+          
+          npm run build
           
           echo "내 서버에서 앱을 실행합니다."
           # 실패 시 에러를 뱉도록 설정 (npm run start:dev가 실패하면 롤백으로 넘어감)
-          npm run start:dev
+          # npm run start:dev
+          pm2 restart ecosystem.config.js
 
       - name: Save Success State
         if: success()
         run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use 16.20.2
           
           pm2 save
           echo "배포 성공!"
@@ -34,11 +56,16 @@ jobs:
         if: failure() && steps.deploy_step.outcome == 'failure'
         run: |
           echo "⚠️ 배포 실패 감지! 롤백을 시작합니다."
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use 16.20.2
 
           # 코드를 이전 커밋으로 되돌림
           # git reset --hard HEAD@{1}
           
           # 이전 코드로 다시 빌드
+          npm install
+          npm run build
           
           npm run start:dev
           
