@@ -28,5 +28,7 @@ jobs:
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
           
+          nvm use default || nvm use 16.20.2
+          
           echo "내 서버에서 앱을 실행합니다."
           pm2 reload ecosystem.config.json --env development || npm run start:dev
