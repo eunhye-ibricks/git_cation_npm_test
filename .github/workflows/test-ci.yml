@@ -33,7 +33,7 @@ jobs:
           
           echo "내 서버에서 앱을 실행합니다."
           # 실패 시 에러를 뱉도록 설정 (npm run start:dev가 실패하면 롤백으로 넘어감)
-          pm2 reload ecosystem.config.json --env development || npm run start:dev
+          npm run start:dev
 
       - name: Save Success State
         if: success()
