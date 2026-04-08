@@ -15,10 +15,18 @@ jobs:
       - name: Build
         run: |
           echo "내 서버에서 빌드를 시작합니다."
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          
+          nvm use default || nvm use 16.20.2
+          
           npm install
           npm run build
 
       - name: Run
         run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          
           echo "내 서버에서 앱을 실행합니다."
           pm2 reload ecosystem.config.json --env development || npm run start:dev
