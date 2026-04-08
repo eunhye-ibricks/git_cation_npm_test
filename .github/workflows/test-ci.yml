@@ -63,6 +63,6 @@ jobs:
           npm install
           npm run build
           
-          npm run start:dev
+          pm2 reload ecosystem.config.json --env development || npm run start:dev
           
           echo "🚨 이전 성공 버전으로 자동 복구되었습니다. 코드를 확인하세요!"
